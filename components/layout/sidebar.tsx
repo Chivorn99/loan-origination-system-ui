@@ -36,6 +36,7 @@ import {
 } from '../ui/item';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
+import { UserAvatar } from '../userAvatar';
 
 export function AppSidebar({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -100,18 +101,11 @@ export function AppSidebar({ children }: { children: React.ReactNode }) {
                     size="lg"
                     className="data-open:bg-sidebar-accent data-open:text-sidebar-accent-foreground"
                   >
-                    <Avatar className="size-8">
-                      <AvatarImage
-                        src={sidebarData.user.avatar}
-                        alt={sidebarData.user.name}
-                      />
-                      <AvatarFallback className="rounded-lg">
-                        {sidebarData.user.name
-                          .split(' ')
-                          .map(n => n[0])
-                          .join('')}
-                      </AvatarFallback>
-                    </Avatar>
+                    <UserAvatar
+                      name={sidebarData.user.name}
+                      avatar={sidebarData.user.avatar}
+                    />
+
                     <div className="grid flex-1 text-left text-sm leading-tight">
                       <span className="truncate font-medium">
                         {sidebarData.user.name}
