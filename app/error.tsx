@@ -18,9 +18,7 @@ export default function Error({ error, reset }: ErrorProps) {
     <div className="flex h-screen items-center justify-center px-4">
       <Alert className="max-w-md">
         <AlertTitle>Something went wrong</AlertTitle>
-        <AlertDescription className="mb-4">
-          An unexpected error occurred. Please try again.
-        </AlertDescription>
+        <AlertDescription className="mb-4">An unexpected error occurred. Please try again.</AlertDescription>
 
         <Button size="lg" onClick={reset}>
           Try again

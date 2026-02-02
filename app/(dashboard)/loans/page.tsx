@@ -8,9 +8,7 @@ export default function LoansPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Loans</h1>
-          <p className="text-muted-foreground">
-            Manage all your loan applications and records.
-          </p>
+          <p className="text-muted-foreground">Manage all your loan applications and records.</p>
         </div>
         <Button className="gap-2" size="lg">
           <PlusIcon className="size-4" />

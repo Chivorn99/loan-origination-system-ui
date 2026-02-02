@@ -27,13 +27,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { ChevronsUpDownIcon } from 'lucide-react';
 import { sidebarData } from '@/lib/data/sidebarData';
-import {
-  Item,
-  ItemContent,
-  ItemDescription,
-  ItemMedia,
-  ItemTitle,
-} from '../ui/item';
+import { Item, ItemContent, ItemDescription, ItemMedia, ItemTitle } from '../ui/item';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { UserAvatar } from '../userAvatar';
@@ -50,17 +44,10 @@ export function AppSidebar({ children }: { children: React.ReactNode }) {
               <SidebarMenuButton size="lg" asChild>
                 <Link href="/dashboard">
                   <div className="m-1 flex h-6 w-6 shrink-0 items-center justify-center">
-                    <Image
-                      src={sidebarData.branding.logo}
-                      alt={sidebarData.branding.name}
-                      width={24}
-                      height={24}
-                    />
+                    <Image src={sidebarData.branding.logo} alt={sidebarData.branding.name} width={24} height={24} />
                   </div>
                   <div className="grid flex-1 text-left text-sm leading-tight">
-                    <span className="truncate font-semibold">
-                      {sidebarData.branding.name}
-                    </span>
+                    <span className="truncate font-semibold">{sidebarData.branding.name}</span>
                   </div>
                 </Link>
               </SidebarMenuButton>
@@ -75,11 +62,7 @@ export function AppSidebar({ children }: { children: React.ReactNode }) {
                 const isActive = pathname === item.url;
                 return (
                   <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton
-                      tooltip={item.title}
-                      asChild
-                      isActive={isActive}
-                    >
+                    <SidebarMenuButton tooltip={item.title} asChild isActive={isActive}>
                       <Link href={item.url}>
                         <item.icon className="size-4" />
                         <span>{item.title}</span>
@@ -101,35 +84,22 @@ export function AppSidebar({ children }: { children: React.ReactNode }) {
                     size="lg"
                     className="data-open:bg-sidebar-accent data-open:text-sidebar-accent-foreground"
                   >
-                    <UserAvatar
-                      name={sidebarData.user.name}
-                      avatar={sidebarData.user.avatar}
-                    />
+                    <UserAvatar name={sidebarData.user.name} avatar={sidebarData.user.avatar} />
 
                     <div className="grid flex-1 text-left text-sm leading-tight">
-                      <span className="truncate font-medium">
-                        {sidebarData.user.name}
-                      </span>
-                      <span className="text-muted-foreground truncate text-xs">
-                        {sidebarData.user.email}
-                      </span>
+                      <span className="truncate font-medium">{sidebarData.user.name}</span>
+                      <span className="text-muted-foreground truncate text-xs">{sidebarData.user.email}</span>
                     </div>
                     <ChevronsUpDownIcon className="size-4" />
                   </SidebarMenuButton>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent
-                  className="w-[--radix-dropdown-menu-trigger-width]"
-                  align="start"
-                >
+                <DropdownMenuContent className="w-[--radix-dropdown-menu-trigger-width]" align="start">
                   <DropdownMenuGroup>
                     <DropdownMenuLabel>
                       <Item size={'sm'}>
                         <ItemMedia>
                           <Avatar>
-                            <AvatarImage
-                              src={sidebarData.user.avatar}
-                              alt={sidebarData.user.name}
-                            />
+                            <AvatarImage src={sidebarData.user.avatar} alt={sidebarData.user.name} />
                             <AvatarFallback>
                               {sidebarData.user.name
                                 .split(' ')
@@ -140,9 +110,7 @@ export function AppSidebar({ children }: { children: React.ReactNode }) {
                         </ItemMedia>
                         <ItemContent>
                           <ItemTitle>{sidebarData.user.name}</ItemTitle>
-                          <ItemDescription>
-                            {sidebarData.user.email}
-                          </ItemDescription>
+                          <ItemDescription>{sidebarData.user.email}</ItemDescription>
                         </ItemContent>
                       </Item>
                     </DropdownMenuLabel>

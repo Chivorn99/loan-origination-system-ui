@@ -2,13 +2,7 @@
 
 import { Button } from '@/components/ui/button';
 
-export default function GlobalError({
-  error,
-  reset,
-}: {
-  error: Error;
-  reset: () => void;
-}) {
+export default function GlobalError({ reset }: { error: Error; reset: () => void }) {
   return (
     <html>
       <body className="flex h-screen flex-col items-center justify-center gap-4">

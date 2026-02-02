@@ -6,9 +6,7 @@ export default function CustomersPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Customer</h1>
-          <p className="text-muted-foreground">
-            Manage your pawnshop customers efficiently.
-          </p>
+          <p className="text-muted-foreground">Manage your pawnshop customers efficiently.</p>
         </div>
       </div>
     </div>
