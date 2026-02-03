@@ -1,0 +1,69 @@
+# Dependencies
+node_modules
+.pnp
+.pnp.js
+
+# Build outputs
+.next
+out
+build
+dist
+.vercel
+.turbo
+
+# Lock files
+package-lock.json
+pnpm-lock.yaml
+yarn.lock
+
+# Cache
+.cache
+.parcel-cache
+.eslintcache
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# Environment files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Testing
+coverage
+.nyc_output
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Public assets (usually don't need formatting)
+public
+
+# Config files that should stay as-is
+tsconfig.json
+postcss.config.mjs
+next.config.ts
+
+# GitHub workflows (if you want to keep them as-is)
+.github
+
+# Component library files (shadcn/ui) - OPTIONAL
+# components/ui
+
+# Generated files
+*.generated.*
+*.gen.*
