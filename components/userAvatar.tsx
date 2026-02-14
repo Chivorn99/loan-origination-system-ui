@@ -24,7 +24,7 @@ export function UserAvatar({ name, avatar, size = 'md' }: UserAvatarProps) {
   return (
     <Avatar className={sizeMap[size]}>
       {avatar && <AvatarImage src={avatar} alt={name} />}
-      <AvatarFallback className="rounded-lg">{initials}</AvatarFallback>
+      <AvatarFallback className='rounded-lg'>{initials}</AvatarFallback>
     </Avatar>
   );
 }
