@@ -67,6 +67,3 @@ next.config.ts
 # Generated files
 *.generated.*
 *.gen.*
-
-# Component library files (shadcn/ui)
-components/ui
