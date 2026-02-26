@@ -124,8 +124,9 @@ export function CustomerList() {
                   <button
                     key={i}
                     onClick={() => setPage(i)}
-                    className={`rounded-md border px-3 py-1 ${isActive ? 'border-blue-600 bg-blue-600 text-white' : 'hover:bg-muted'
-                      }`}
+                    className={`rounded-md border px-3 py-1 ${
+                      isActive ? 'border-blue-600 bg-blue-600 text-white' : 'hover:bg-muted'
+                    }`}
                   >
                     {i + 1}
                   </button>
