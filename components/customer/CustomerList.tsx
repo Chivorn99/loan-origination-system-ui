@@ -5,14 +5,14 @@ import { format } from 'date-fns';
 import { useCustomers } from '@/hooks/useCustomer';
 import { Customer } from '@/validations/customer';
 import { StatusBadge } from '@/components/customer/StatusBadge';
-import { CustomerFilter } from '@/components/customer/CustomerFilter'; 
+import { CustomerFilter } from '@/components/customer/CustomerFilter';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { State } from '@/components/State';
 
 export function CustomerList() {
   const [page, setPage] = useState(0);
   const [search, setSearch] = useState('');
-  const [statusFilter, setStatusFilter] = useState(''); 
+  const [statusFilter, setStatusFilter] = useState('');
   const size = 10;
 
   const { data, isLoading, error } = useCustomers(page, size);
@@ -34,11 +34,11 @@ export function CustomerList() {
         c.idNumber.toLowerCase().includes(s) ||
         (c.phone && c.phone.toLowerCase().includes(s));
 
-      const matchesStatus = !statusFilter || c.status === statusFilter; 
+      const matchesStatus = !statusFilter || c.status === statusFilter;
 
       return matchesSearch && matchesStatus;
     });
-  }, [customers, search, statusFilter]); 
+  }, [customers, search, statusFilter]);
 
   const displayedCount = filteredCustomers.length;
   const start = displayedCount ? currentPage * size + 1 : 0;
@@ -124,9 +124,8 @@ export function CustomerList() {
                   <button
                     key={i}
                     onClick={() => setPage(i)}
-                    className={`rounded-md border px-3 py-1 ${
-                      isActive ? 'border-blue-600 bg-blue-600 text-white' : 'hover:bg-muted'
-                    }`}
+                    className={`rounded-md border px-3 py-1 ${isActive ? 'border-blue-600 bg-blue-600 text-white' : 'hover:bg-muted'
+                      }`}
                   >
                     {i + 1}
                   </button>
