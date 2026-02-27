@@ -1,68 +1,132 @@
 import { z } from 'zod';
+import { BranchSchema } from './branch';
+import { CurrencySchema } from './currency';
+import { CustomerSchema } from './customer';
+import { PawnItemSchema } from './pawnItem';
 
-export const BranchSchema = z.object({
-  id: z.number(),
-  name: z.string(),
-  address: z.string(),
-  phone: z.string(),
-  status: z.string(),
+/* =========================================================
+   PAYMENT FREQUENCY ENUM
+========================================================= */
+
+export const PaymentFrequencyEnum = z.enum(['ONE_TIME', 'WEEKLY', 'BI_WEEKLY', 'MONTHLY', 'QUARTERLY']);
+
+/* =========================================================
+   CUSTOMER INFO
+========================================================= */
+
+export const CustomerInfoSchema = z.object({
+  fullName: z.string().min(1, 'Full name is required for new customer'),
+  phone: z.string().min(1, 'Phone is required for new customer'),
+  address: z.string().optional(),
 });
 
-export const CurrencySchema = z.object({
-  id: z.number(),
-  code: z.string(),
-  name: z.string(),
-  symbol: z.string(),
-  decimalPlace: z.number(),
-  status: z.string(),
+/* =========================================================
+   COLLATERAL INFO
+   Either pawnItemId OR (itemType + estimatedValue)
+========================================================= */
+
+export const CollateralInfoSchema = z
+  .object({
+    pawnItemId: z.number().optional(),
+    itemType: z.string().optional(),
+    description: z.string().optional(),
+    estimatedValue: z.number().positive('Estimated value must be positive').optional(),
+    // Allow empty string (omit from payload) or a valid URL
+    photoUrl: z
+      .string()
+      .optional()
+      .transform(val => (val === '' ? undefined : val))
+      .pipe(z.string().url('Photo URL must be a valid URL').optional()),
+  })
+  .refine(data => data.pawnItemId || (data.itemType && data.itemType.trim() !== '' && data.estimatedValue), {
+    message: 'Either existing pawn item or new collateral details must be provided',
+    path: ['itemType'],
+  });
+
+/* =========================================================
+   LOAN INFO
+========================================================= */
+
+export const LoanInfoSchema = z.object({
+  currencyId: z.number().min(1, 'Currency is required'),
+  branchId: z.number().min(1, 'Branch is required'),
+
+  loanAmount: z.number().positive('Loan amount must be positive'),
+  interestRate: z.number().positive('Interest rate must be positive'),
+
+  dueDate: z
+    .string()
+    .min(1, 'Due date is required')
+    .refine(date => {
+      const selected = new Date(date);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      return selected >= today;
+    }, 'Due date must be today or in the future'),
+
+  redemptionDeadline: z.string().optional(),
+
+  loanDurationDays: z.number().min(1, 'Loan duration must be at least 1 day').default(30),
+  gracePeriodDays: z.number().min(0, 'Grace period cannot be negative').default(7),
+
+  // Allow 0 for storageFee and penaltyRate (backend uses @Positive only when provided)
+  storageFee: z.number().min(0, 'Storage fee cannot be negative').default(0),
+  penaltyRate: z.number().min(0, 'Penalty rate cannot be negative').default(0),
+
+  paymentFrequency: PaymentFrequencyEnum.default('ONE_TIME'),
+  numberOfInstallments: z.number().min(1, 'Number of installments must be at least 1').default(1),
+  installmentAmount: z.number().positive('Installment amount must be positive').optional(),
 });
 
-export const CustomerSchema = z.object({
-  id: z.number(),
-  fullName: z.string(),
-  idNumber: z.string(),
-  phone: z.string(),
-  address: z.string(),
-  status: z.string(),
-  createdAt: z.string().optional(),
-  updatedAt: z.string().optional(),
-  deletedAt: z.string().nullable().optional(),
+/* =========================================================
+   CREATE FULL LOAN (MAIN SCHEMA)
+========================================================= */
+
+export const CreateFullLoanSchema = z.object({
+  nationalId: z.string().min(1, 'National ID is required'),
+  customerInfo: CustomerInfoSchema.optional(),
+  collateralInfo: CollateralInfoSchema,
+  loanInfo: LoanInfoSchema,
 });
 
-export const PawnItemSchema = z.object({
-  id: z.number(),
-  description: z.string(),
-  estimatedValue: z.number(),
-  itemType: z.string(),
-  photoUrl: z.string().nullable().optional(),
-  status: z.string(),
-  createdAt: z.string().optional(),
-  updatedAt: z.string().optional(),
-});
+export type CreateFullLoanPayload = z.infer<typeof CreateFullLoanSchema>;
+
+/* =========================================================
+   PAWN LOAN RESPONSE
+========================================================= */
 
 export const PawnLoanSchema = z.object({
   id: z.number(),
   loanCode: z.string(),
+
   loanAmount: z.number(),
   interestRate: z.number(),
 
-  dueDate: z.string().nullable(),
   loanDate: z.string(),
+  dueDate: z.string().nullable(),
 
   status: z.string(),
   totalPayableAmount: z.number(),
 
-  redeemedAt: z.string().nullable(),
-  defaultedAt: z.string().nullable(),
+  redeemedAt: z.string().nullable().optional(),
+  defaultedAt: z.string().nullable().optional(),
+  overdueAt: z.string().nullable().optional(),
+  gracePeriodEndDate: z.string().nullable().optional(),
 
   createdAt: z.string(),
-  updatedAt: z.string().nullable(),
+  updatedAt: z.string().nullable().optional(),
 
   branch: BranchSchema,
   currency: CurrencySchema,
   customer: CustomerSchema,
   pawnItem: PawnItemSchema,
 });
+
+export type PawnLoan = z.infer<typeof PawnLoanSchema>;
+
+/* =========================================================
+   PAGINATION
+========================================================= */
 
 export const PawnLoanPaginationSchema = z.object({
   content: z.array(PawnLoanSchema),
@@ -77,6 +141,3 @@ export const PawnLoanResponseSchema = z.object({
   message: z.string(),
   data: PawnLoanPaginationSchema,
 });
-
-export type PawnLoan = z.infer<typeof PawnLoanSchema>;
-export type PawnLoanResponse = z.infer<typeof PawnLoanResponseSchema>;
