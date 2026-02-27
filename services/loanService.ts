@@ -28,10 +28,6 @@ export const getLoansByStatusService = async (status: string, page = 0, size = 1
   return PawnLoanResponseSchema.parse(json);
 };
 
-// ==============================
-// GET LOAN DETAIL
-// ==============================
-
 export const getLoanDetailService = async (id: string) => {
   const res = await fetch(`/api/pawn-loans/${id}`);
 
@@ -43,10 +39,6 @@ export const getLoanDetailService = async (id: string) => {
 
   return PawnLoanSchema.parse(json.data);
 };
-
-// ==============================
-// SEARCH BY LOAN CODE
-// ==============================
 
 export const getLoanByCodeService = async (code: string) => {
   const res = await fetch(`/api/pawn-loans/code/${code}`);

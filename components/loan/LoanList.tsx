@@ -32,20 +32,19 @@ export function LoanList() {
 
   return (
     <div className="space-y-4">
-      {/* FILTERS */}
       <CustomFilters
         showSearch
         showBranch={false}
         showDate={false}
         showStatus
-        statuses={['ACTIVE', 'CREATED', 'REDEEMED', 'DEFAULTED', 'OVERDUE']}
+        statuses={['ACTIVE', 'CREATED', 'REDEEMED', 'DEFAULTED', 'OVERDUE', 'PENDING', 'PARTIALLY_PAID', 'CANCELLED']}
         onSearch={value => {
           setPage(0);
           setSearch(value.trim());
         }}
         onStatusChange={value => {
           setPage(0);
-          setSearch(''); // clear search when filtering
+          setSearch('');
           setStatusFilter(value || undefined);
         }}
       />
@@ -132,7 +131,6 @@ export function LoanList() {
           </TableBody>
         </Table>
 
-        {/* PAGINATION (disabled during search) */}
         {!search && (
           <div className="flex items-center justify-between border-t px-6 py-4 text-sm">
             <div className="text-muted-foreground">
