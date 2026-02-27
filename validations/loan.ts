@@ -4,15 +4,7 @@ import { CurrencySchema } from './currency';
 import { CustomerSchema } from './customer';
 import { PawnItemSchema } from './pawnItem';
 
-/* =========================================================
-   PAYMENT FREQUENCY ENUM
-========================================================= */
-
 export const PaymentFrequencyEnum = z.enum(['ONE_TIME', 'WEEKLY', 'BI_WEEKLY', 'MONTHLY', 'QUARTERLY']);
-
-/* =========================================================
-   CUSTOMER INFO
-========================================================= */
 
 export const CustomerInfoSchema = z.object({
   fullName: z.string().min(1, 'Full name is required for new customer'),
@@ -20,18 +12,12 @@ export const CustomerInfoSchema = z.object({
   address: z.string().optional(),
 });
 
-/* =========================================================
-   COLLATERAL INFO
-   Either pawnItemId OR (itemType + estimatedValue)
-========================================================= */
-
 export const CollateralInfoSchema = z
   .object({
     pawnItemId: z.number().optional(),
     itemType: z.string().optional(),
     description: z.string().optional(),
     estimatedValue: z.number().positive('Estimated value must be positive').optional(),
-    // Allow empty string (omit from payload) or a valid URL
     photoUrl: z
       .string()
       .optional()
@@ -42,10 +28,6 @@ export const CollateralInfoSchema = z
     message: 'Either existing pawn item or new collateral details must be provided',
     path: ['itemType'],
   });
-
-/* =========================================================
-   LOAN INFO
-========================================================= */
 
 export const LoanInfoSchema = z.object({
   currencyId: z.number().min(1, 'Currency is required'),
@@ -69,7 +51,6 @@ export const LoanInfoSchema = z.object({
   loanDurationDays: z.number().min(1, 'Loan duration must be at least 1 day').default(30),
   gracePeriodDays: z.number().min(0, 'Grace period cannot be negative').default(7),
 
-  // Allow 0 for storageFee and penaltyRate (backend uses @Positive only when provided)
   storageFee: z.number().min(0, 'Storage fee cannot be negative').default(0),
   penaltyRate: z.number().min(0, 'Penalty rate cannot be negative').default(0),
 
@@ -77,10 +58,6 @@ export const LoanInfoSchema = z.object({
   numberOfInstallments: z.number().min(1, 'Number of installments must be at least 1').default(1),
   installmentAmount: z.number().positive('Installment amount must be positive').optional(),
 });
-
-/* =========================================================
-   CREATE FULL LOAN (MAIN SCHEMA)
-========================================================= */
 
 export const CreateFullLoanSchema = z.object({
   nationalId: z.string().min(1, 'National ID is required'),
@@ -90,10 +67,6 @@ export const CreateFullLoanSchema = z.object({
 });
 
 export type CreateFullLoanPayload = z.infer<typeof CreateFullLoanSchema>;
-
-/* =========================================================
-   PAWN LOAN RESPONSE
-========================================================= */
 
 export const PawnLoanSchema = z.object({
   id: z.number(),
@@ -123,10 +96,6 @@ export const PawnLoanSchema = z.object({
 });
 
 export type PawnLoan = z.infer<typeof PawnLoanSchema>;
-
-/* =========================================================
-   PAGINATION
-========================================================= */
 
 export const PawnLoanPaginationSchema = z.object({
   content: z.array(PawnLoanSchema),
