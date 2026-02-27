@@ -1,5 +1,5 @@
-import { customerService } from '@/services/customerService';
-import { useQuery } from '@tanstack/react-query';
+import { createCustomerService, customerService } from '@/services/customerService';
+import { useQuery, useMutation } from '@tanstack/react-query';
 
 export function useCustomers(page = 0, size = 10, status?: string) {
   return useQuery({
@@ -7,3 +7,9 @@ export function useCustomers(page = 0, size = 10, status?: string) {
     queryFn: () => customerService.getAll(page, size, status),
   });
 }
+
+export const useCreateCustomer = () => {
+  return useMutation({
+    mutationFn: createCustomerService,
+  });
+};

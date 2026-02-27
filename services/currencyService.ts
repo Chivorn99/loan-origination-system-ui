@@ -7,6 +7,15 @@ import {
   type CurrencyPatch,
 } from '@/validations/currency';
 
+async function extractError(res: Response, fallback: string): Promise<never> {
+  try {
+    const json = await res.json();
+    throw new Error(json?.message ?? json?.error ?? fallback);
+  } catch {
+    throw new Error(fallback);
+  }
+}
+
 export const currencyService = {
   async getAll(page = 0, size = 10, status?: string) {
     let url = `/api/currencies?page=${page}&size=${size}&sortBy=code&direction=asc`;
@@ -18,7 +27,7 @@ export const currencyService = {
     const res = await fetch(url);
 
     if (!res.ok) {
-      throw new Error('Failed to fetch currencies');
+      await extractError(res, 'Failed to fetch currencies');
     }
 
     const json = await res.json();
@@ -29,7 +38,7 @@ export const currencyService = {
     const res = await fetch(`/api/currencies/${id}`);
 
     if (!res.ok) {
-      throw new Error('Failed to fetch currency');
+      await extractError(res, 'Failed to fetch currency');
     }
 
     const json = await res.json();
@@ -43,11 +52,11 @@ export const currencyService = {
       body: JSON.stringify(CurrencyRequestSchema.parse(payload)),
     });
 
-    if (!res.ok) {
-      throw new Error('Failed to create currency');
-    }
-
     const json = await res.json();
+
+    if (!res.ok) {
+      throw new Error(json?.message ?? json?.error ?? 'Failed to create currency');
+    }
     return CurrencySchema.parse(json.data);
   },
 
@@ -58,11 +67,11 @@ export const currencyService = {
       body: JSON.stringify(CurrencyRequestSchema.parse(payload)),
     });
 
-    if (!res.ok) {
-      throw new Error('Failed to update currency');
-    }
-
     const json = await res.json();
+
+    if (!res.ok) {
+      throw new Error(json?.message ?? json?.error ?? 'Failed to update currency');
+    }
     return CurrencySchema.parse(json.data);
   },
 
@@ -73,11 +82,11 @@ export const currencyService = {
       body: JSON.stringify(CurrencyPatchSchema.parse(payload)),
     });
 
-    if (!res.ok) {
-      throw new Error('Failed to patch currency');
-    }
-
     const json = await res.json();
+
+    if (!res.ok) {
+      throw new Error(json?.message ?? json?.error ?? 'Failed to patch currency');
+    }
     return CurrencySchema.parse(json.data);
   },
 
@@ -85,7 +94,7 @@ export const currencyService = {
     const res = await fetch(`/api/currencies/${id}`, { method: 'DELETE' });
 
     if (!res.ok) {
-      throw new Error('Failed to delete currency');
+      await extractError(res, 'Failed to delete currency');
     }
   },
 };
