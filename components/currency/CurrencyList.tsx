@@ -1,9 +1,8 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Pencil, Trash2 } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
-
 import { type Currency } from '@/validations/currency';
 import { useCurrencies } from '@/hooks/useCurrency';
 import { currencyService } from '@/services/currencyService';
@@ -11,17 +10,22 @@ import { CurrencyFilter } from '@/components/currency/CurrencyFilter';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { State } from '@/components/State';
 import { CurrencyStatusToggle } from './Currencystatustoggle';
+import { CurrencyFormModal } from './Currencyformmodal';
 
 type Props = {
-  onEdit?: (currency: Currency) => void;
+  triggerCreate?: boolean;
+  onCreateHandled?: () => void;
 };
 
-export function CurrencyList({ onEdit }: Props) {
+export function CurrencyList({ triggerCreate, onCreateHandled }: Props) {
   const [page, setPage] = useState(0);
   const [search, setSearch] = useState('');
   const [togglingId, setTogglingId] = useState<number | null>(null);
-  const size = 10;
 
+  const [modalOpen, setModalOpen] = useState(false);
+  const [editingCurrency, setEditingCurrency] = useState<Currency | null>(null);
+
+  const size = 10;
   const queryClient = useQueryClient();
   const { data, isLoading, error } = useCurrencies(page, size);
 
@@ -29,6 +33,14 @@ export function CurrencyList({ onEdit }: Props) {
   const totalElements = data?.totalElements ?? 0;
   const totalPages = data?.totalPages ?? 0;
   const currentPage = data?.number ?? 0;
+
+  useEffect(() => {
+    if (triggerCreate) {
+      setEditingCurrency(null);
+      setModalOpen(true);
+      onCreateHandled?.();
+    }
+  }, [triggerCreate, onCreateHandled]);
 
   const filteredCurrencies = useMemo(() => {
     const s = search.trim().toLowerCase();
@@ -46,7 +58,12 @@ export function CurrencyList({ onEdit }: Props) {
 
   const handleSearch = (value: string) => {
     setSearch(value);
-    setPage(0);
+    // setPage(0);
+  };
+
+  const handleEdit = (currency: Currency) => {
+    setEditingCurrency(currency);
+    setModalOpen(true);
   };
 
   const handleToggleStatus = async (currency: Currency) => {
@@ -118,7 +135,7 @@ export function CurrencyList({ onEdit }: Props) {
                   <TableCell className="text-right">
                     <div className="flex items-center justify-end gap-3">
                       <button
-                        onClick={() => onEdit?.(currency)}
+                        onClick={() => handleEdit(currency)}
                         className="text-gray-400 transition-colors hover:text-blue-600"
                         aria-label="Edit"
                       >
@@ -179,6 +196,16 @@ export function CurrencyList({ onEdit }: Props) {
             </div>
           </div>
         </div>
+        {modalOpen && (
+          <CurrencyFormModal
+            currency={editingCurrency}
+            onClose={() => {
+              setModalOpen(false);
+              setEditingCurrency(null);
+            }}
+            onSuccess={invalidate}
+          />
+        )}
       </div>
     </State>
   );
