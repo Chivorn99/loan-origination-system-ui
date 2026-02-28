@@ -38,12 +38,9 @@ export function CustomFilters({
     <Card className="shadow-sm">
       <CardContent className="px-4">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:gap-4">
-
           {showSearch && (
-            <div className="flex-1 min-w-[220px] space-y-1.5">
-              <Label className="text-muted-foreground text-xs font-semibold tracking-wider uppercase">
-                Search
-              </Label>
+            <div className="min-w-[220px] flex-1 space-y-1.5">
+              <Label className="text-muted-foreground text-xs font-semibold tracking-wider uppercase">Search</Label>
 
               <div className="relative">
                 <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
@@ -51,17 +48,15 @@ export function CustomFilters({
                   type="text"
                   placeholder="Search by loan code..."
                   onChange={e => onSearch?.(e.target.value)}
-                  className="pl-9 w-full"
+                  className="w-full pl-9"
                 />
               </div>
             </div>
           )}
 
           {showStatus && (
-            <div className="w-full lg:w-40 space-y-1.5">
-              <Label className="text-muted-foreground text-xs font-semibold tracking-wider uppercase">
-                Status
-              </Label>
+            <div className="w-full space-y-1.5 lg:w-40">
+              <Label className="text-muted-foreground text-xs font-semibold tracking-wider uppercase">Status</Label>
 
               <Select onValueChange={val => onStatusChange?.(val === 'ALL' ? '' : val)}>
                 <SelectTrigger>
@@ -81,10 +76,8 @@ export function CustomFilters({
           )}
 
           {showBranch && (
-            <div className="w-full lg:w-40 space-y-1.5">
-              <Label className="text-muted-foreground text-xs font-semibold tracking-wider uppercase">
-                Branch
-              </Label>
+            <div className="w-full space-y-1.5 lg:w-40">
+              <Label className="text-muted-foreground text-xs font-semibold tracking-wider uppercase">Branch</Label>
 
               <Select onValueChange={val => onBranchChange?.(val === 'ALL' ? '' : val)}>
                 <SelectTrigger>
@@ -104,22 +97,15 @@ export function CustomFilters({
           )}
 
           {showDate && (
-            <div className="w-full lg:w-40 space-y-1.5">
-              <Label className="text-muted-foreground text-xs font-semibold tracking-wider uppercase">
-                Due Date
-              </Label>
+            <div className="w-full space-y-1.5 lg:w-40">
+              <Label className="text-muted-foreground text-xs font-semibold tracking-wider uppercase">Due Date</Label>
 
               <div className="relative">
                 <Calendar className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
-                <Input
-                  type="date"
-                  onChange={e => onDateChange?.(e.target.value)}
-                  className="pl-9"
-                />
+                <Input type="date" onChange={e => onDateChange?.(e.target.value)} className="pl-9" />
               </div>
             </div>
           )}
-
         </div>
       </CardContent>
     </Card>

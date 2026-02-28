@@ -27,11 +27,28 @@ export default function CreateLoanPage() {
   const { data: currencies, isLoading: currenciesLoading } = useCurrencies(0, 100, 'ACTIVE');
   const { data: branches, isLoading: branchesLoading } = useBranches(0, 100, 'ACTIVE');
 
-  const [customerForm, setCustomerForm] = useState<CustomerForm>({ fullName: '', phone: '', idNumber: '', address: '' });
-  const [itemForm, setItemForm] = useState<ItemForm>({ itemType: '', description: '', estimatedValue: 0, photoUrl: '' });
+  const [customerForm, setCustomerForm] = useState<CustomerForm>({
+    fullName: '',
+    phone: '',
+    idNumber: '',
+    address: '',
+  });
+  const [itemForm, setItemForm] = useState<ItemForm>({
+    itemType: '',
+    description: '',
+    estimatedValue: 0,
+    photoUrl: '',
+  });
   const [loanForm, setLoanForm] = useState<LoanForm>({
-    currencyId: 0, branchId: 0, loanAmount: '', interestRate: '',
-    dueDate: '', loanDurationDays: 30, gracePeriodDays: 7, storageFee: 0, penaltyRate: 0,
+    currencyId: 0,
+    branchId: 0,
+    loanAmount: '',
+    interestRate: '',
+    dueDate: '',
+    loanDurationDays: 30,
+    gracePeriodDays: 7,
+    storageFee: 0,
+    penaltyRate: 0,
   });
 
   const loanAmount = Number(loanForm.loanAmount || 0);
@@ -81,23 +98,20 @@ export default function CreateLoanPage() {
   return (
     <div className="bg-muted min-h-screen">
       <div className="mx-auto max-w-7xl space-y-6 p-6">
-
         <div className="flex items-center justify-between">
           <div>
-            <nav className="mb-1 flex items-center gap-2 text-sm text-muted-foreground">
+            <nav className="text-muted-foreground mb-1 flex items-center gap-2 text-sm">
               <span
-                className="cursor-pointer transition-colors hover:text-foreground"
+                className="hover:text-foreground cursor-pointer transition-colors"
                 onClick={() => router.push('/loans')}
               >
                 Loans
               </span>
               <span>/</span>
-              <span className="font-medium text-foreground">Create New Loan</span>
+              <span className="text-foreground font-medium">Create New Loan</span>
             </nav>
-            <h1 className="text-2xl font-semibold text-foreground">Create New Loan</h1>
-            <p className="mt-0.5 text-sm text-muted-foreground">
-              Setup terms and collateral for a new pawn agreement
-            </p>
+            <h1 className="text-foreground text-2xl font-semibold">Create New Loan</h1>
+            <p className="text-muted-foreground mt-0.5 text-sm">Setup terms and collateral for a new pawn agreement</p>
           </div>
         </div>
 
@@ -112,12 +126,7 @@ export default function CreateLoanPage() {
           />
         )}
         {step === 2 && (
-          <ItemStep
-            form={itemForm}
-            onChange={setItemForm}
-            onNext={() => setStep(3)}
-            onBack={() => setStep(1)}
-          />
+          <ItemStep form={itemForm} onChange={setItemForm} onNext={() => setStep(3)} onBack={() => setStep(1)} />
         )}
         {step === 3 && (
           <LoanDetailsStep

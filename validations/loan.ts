@@ -144,13 +144,10 @@ export const CollateralInfoSchema = z
       .transform(val => (val === '' ? undefined : val))
       .pipe(z.string().url('Photo URL must be a valid URL').optional()),
   })
-  .refine(
-    data => data.pawnItemId || (data.itemType && data.itemType.trim() !== '' && data.estimatedValue),
-    {
-      message: 'Either existing pawn item or new collateral details must be provided',
-      path: ['itemType'],
-    },
-  );
+  .refine(data => data.pawnItemId || (data.itemType && data.itemType.trim() !== '' && data.estimatedValue), {
+    message: 'Either existing pawn item or new collateral details must be provided',
+    path: ['itemType'],
+  });
 
 export const LoanInfoSchema = z.object({
   currencyId: z.number().min(1, 'Currency is required'),

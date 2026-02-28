@@ -50,7 +50,9 @@ export default function ItemStep({ form, onChange, onNext, onBack }: ItemStepPro
         <CardContent>
           <div className="grid grid-cols-2 gap-5">
             <div className="space-y-1.5">
-              <Label>Item Type <span className="text-destructive">*</span></Label>
+              <Label>
+                Item Type <span className="text-destructive">*</span>
+              </Label>
               <Input
                 placeholder="e.g. Jewelry, Electronics"
                 {...register('itemType')}
@@ -60,7 +62,9 @@ export default function ItemStep({ form, onChange, onNext, onBack }: ItemStepPro
             </div>
 
             <div className="space-y-1.5">
-              <Label>Estimated Value <span className="text-destructive">*</span></Label>
+              <Label>
+                Estimated Value <span className="text-destructive">*</span>
+              </Label>
               <Input
                 type="number"
                 placeholder="0.00"

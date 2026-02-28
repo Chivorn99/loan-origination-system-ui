@@ -21,8 +21,8 @@ interface ReviewStepProps {
 function ReviewRow({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex items-center justify-between py-1">
-      <dt className="text-sm text-muted-foreground">{label}</dt>
-      <dd className="text-sm font-medium text-foreground">{value}</dd>
+      <dt className="text-muted-foreground text-sm">{label}</dt>
+      <dd className="text-foreground text-sm font-medium">{value}</dd>
     </div>
   );
 }
@@ -45,7 +45,9 @@ export default function ReviewStep({
       <div className="grid grid-cols-2 gap-6">
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Customer</CardTitle>
+            <CardTitle className="text-muted-foreground text-sm font-semibold tracking-wider uppercase">
+              Customer
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <dl>
@@ -59,13 +61,18 @@ export default function ReviewStep({
 
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Pawn Item</CardTitle>
+            <CardTitle className="text-muted-foreground text-sm font-semibold tracking-wider uppercase">
+              Pawn Item
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <dl>
               <ReviewRow label="Item Type" value={itemForm.itemType || '—'} />
               <ReviewRow label="Description" value={itemForm.description || '—'} />
-              <ReviewRow label="Estimated Value" value={itemForm.estimatedValue ? `$${itemForm.estimatedValue.toLocaleString()}` : '—'} />
+              <ReviewRow
+                label="Estimated Value"
+                value={itemForm.estimatedValue ? `$${itemForm.estimatedValue.toLocaleString()}` : '—'}
+              />
             </dl>
           </CardContent>
         </Card>
@@ -73,13 +80,25 @@ export default function ReviewStep({
 
       <Card>
         <CardHeader className="pb-3">
-          <CardTitle className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Loan Terms</CardTitle>
+          <CardTitle className="text-muted-foreground text-sm font-semibold tracking-wider uppercase">
+            Loan Terms
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-2 gap-x-10">
             <dl>
-              <ReviewRow label="Loan Amount" value={loanForm.loanAmount ? `$${Number(loanForm.loanAmount).toLocaleString('en-US', { minimumFractionDigits: 2 })}` : '—'} />
-              <ReviewRow label="Interest Rate" value={loanForm.interestRate ? `${loanForm.interestRate}% / month` : '—'} />
+              <ReviewRow
+                label="Loan Amount"
+                value={
+                  loanForm.loanAmount
+                    ? `$${Number(loanForm.loanAmount).toLocaleString('en-US', { minimumFractionDigits: 2 })}`
+                    : '—'
+                }
+              />
+              <ReviewRow
+                label="Interest Rate"
+                value={loanForm.interestRate ? `${loanForm.interestRate}% / month` : '—'}
+              />
               <ReviewRow label="Accrued Interest" value={`$${interest.toFixed(2)}`} />
               <ReviewRow label="Storage Fee" value={`$${Number(loanForm.storageFee || 0).toFixed(2)}`} />
               <ReviewRow label="Penalty Rate" value={`${Number(loanForm.penaltyRate || 0).toFixed(2)}%`} />
@@ -94,9 +113,9 @@ export default function ReviewStep({
 
           <Separator className="my-4" />
 
-          <div className="flex items-center justify-between rounded-lg bg-primary/10 px-5 py-4">
-            <span className="text-sm font-semibold text-primary">Total Due at Maturity</span>
-            <span className="text-xl font-bold text-primary">${total.toFixed(2)}</span>
+          <div className="bg-primary/10 flex items-center justify-between rounded-lg px-5 py-4">
+            <span className="text-primary text-sm font-semibold">Total Due at Maturity</span>
+            <span className="text-primary text-xl font-bold">${total.toFixed(2)}</span>
           </div>
         </CardContent>
       </Card>
@@ -106,7 +125,9 @@ export default function ReviewStep({
           <ChevronLeft className="mr-1 h-4 w-4" /> Back
         </Button>
         <div className="flex gap-3">
-          <Button variant="outline" onClick={onCancel}>Cancel</Button>
+          <Button variant="outline" onClick={onCancel}>
+            Cancel
+          </Button>
           <Button onClick={onConfirm} disabled={isPending}>
             {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             {isPending ? 'Processing...' : 'Confirm & Create Loan'}

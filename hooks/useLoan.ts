@@ -9,27 +9,18 @@ import {
   loanPaymentScheduleService,
   loanOverdueService,
 } from '@/services/loanService';
-import type {
-  PawnLoanList,
-  PawnLoanDetail,
-  PawnLoanPageResponse,
-  CreateFullLoanPayload,
-} from '@/validations/loan';
-
-// ─── List ─────────────────────────────────────────────────────────────────────
+import type { PawnLoanDetail, PawnLoanPageResponse, CreateFullLoanPayload } from '@/validations/loan';
 
 export function usePawnLoans(page = 0, size = 10, status?: string, customerId?: number) {
   return useQuery<PawnLoanPageResponse>({
     queryKey: ['pawn-loans', page, size, status, customerId],
     queryFn: () => {
       if (customerId) return pawnLoanService.getByCustomer(customerId, page, size);
-      if (status)     return pawnLoanService.getByStatus(status, page, size);
+      if (status) return pawnLoanService.getByStatus(status, page, size);
       return pawnLoanService.getAll(page, size);
     },
   });
 }
-
-// ─── Detail ───────────────────────────────────────────────────────────────────
 
 export function usePawnLoanDetail(id: string) {
   return useQuery<PawnLoanDetail>({
@@ -46,8 +37,6 @@ export function useLoanByCode(code: string) {
     enabled: !!code,
   });
 }
-
-// ─── Mutations ────────────────────────────────────────────────────────────────
 
 export const useCreateFullLoan = (onSuccess?: () => void) => {
   const queryClient = useQueryClient();
@@ -84,8 +73,6 @@ export const useDefaultLoan = () => {
     },
   });
 };
-
-// ─── Schedule & Overdue ───────────────────────────────────────────────────────
 
 export function useLoanPaymentSchedule(id: string) {
   return useQuery({

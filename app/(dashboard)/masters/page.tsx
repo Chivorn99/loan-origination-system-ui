@@ -39,12 +39,12 @@ export default function MastersPage() {
   };
 
   return (
-    <div className="min-h-screen bg-muted">
+    <div className="bg-muted min-h-screen">
       <div className="mx-auto max-w-6xl space-y-6 p-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-semibold text-foreground">Master Data</h1>
-            <p className="text-sm text-muted-foreground">{tabConfig[activeTab].description}</p>
+            <h1 className="text-foreground text-2xl font-semibold">Master Data</h1>
+            <p className="text-muted-foreground text-sm">{tabConfig[activeTab].description}</p>
           </div>
           <Button size="sm" onClick={() => setTriggerCreate(true)}>
             <PlusIcon className="mr-2 h-4 w-4" />
@@ -59,7 +59,7 @@ export default function MastersPage() {
             setTriggerCreate(false);
           }}
         >
-          <TabsList className="border bg-background">
+          <TabsList className="bg-background border">
             {(Object.entries(tabConfig) as [Tab, (typeof tabConfig)[Tab]][]).map(([key, val]) => (
               <TabsTrigger key={key} value={key} className="flex items-center gap-2">
                 {val.icon}

@@ -35,7 +35,7 @@ export default function LoginPage() {
 
   const onSubmit = (data: LoginForm) => {
     login.mutate(data, {
-      onSuccess: (res) => {
+      onSuccess: res => {
         document.cookie = `token=${res.token}; path=/; max-age=${60 * 60 * 24 * 7}`;
         router.push('/dashboard');
         router.refresh();
@@ -44,28 +44,26 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-muted flex items-center justify-center p-4">
+    <div className="bg-muted flex min-h-screen items-center justify-center p-4">
       <div className="w-full max-w-md">
-
-        <div className="flex flex-col items-center mb-8 gap-3">
+        <div className="mb-8 flex flex-col items-center gap-3">
           <div className="bg-primary rounded-2xl p-3 shadow-lg">
-            <Landmark className="h-7 w-7 text-primary-foreground" />
+            <Landmark className="text-primary-foreground h-7 w-7" />
           </div>
           <div className="text-center">
-            <h1 className="text-2xl font-bold text-foreground tracking-tight">Loan Management System</h1>
-            <p className="text-muted-foreground text-sm mt-1">Sign in to access your dashboard</p>
+            <h1 className="text-foreground text-2xl font-bold tracking-tight">Loan Management System</h1>
+            <p className="text-muted-foreground mt-1 text-sm">Sign in to access your dashboard</p>
           </div>
         </div>
 
-        <Card className="shadow-xl border-border">
+        <Card className="border-border shadow-xl">
           <CardHeader className="pb-4">
-            <CardTitle className="text-lg text-foreground">Welcome back</CardTitle>
+            <CardTitle className="text-foreground text-lg">Welcome back</CardTitle>
             <CardDescription className="text-muted-foreground">Enter your credentials to continue</CardDescription>
           </CardHeader>
 
           <CardContent>
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-
               <div className="space-y-1.5">
                 <Label htmlFor="username" className="text-foreground text-sm font-medium">
                   Username
@@ -78,7 +76,7 @@ export default function LoginPage() {
                   className={errors.username ? 'border-destructive focus-visible:ring-destructive/30' : ''}
                 />
                 {errors.username && (
-                  <p className="text-destructive text-xs flex items-center gap-1">
+                  <p className="text-destructive flex items-center gap-1 text-xs">
                     <AlertCircle className="h-3 w-3 shrink-0" />
                     {errors.username.message}
                   </p>
@@ -101,13 +99,13 @@ export default function LoginPage() {
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                    className="text-muted-foreground hover:text-foreground absolute top-1/2 right-3 -translate-y-1/2 transition-colors"
                   >
                     {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>
                 </div>
                 {errors.password && (
-                  <p className="text-destructive text-xs flex items-center gap-1">
+                  <p className="text-destructive flex items-center gap-1 text-xs">
                     <AlertCircle className="h-3 w-3 shrink-0" />
                     {errors.password.message}
                   </p>
@@ -123,11 +121,7 @@ export default function LoginPage() {
                 </Alert>
               )}
 
-              <Button
-                type="submit"
-                disabled={login.isPending}
-                className="w-full mt-2"
-              >
+              <Button type="submit" disabled={login.isPending} className="mt-2 w-full">
                 {login.isPending ? (
                   <span className="flex items-center gap-2">
                     <Loader2 className="h-4 w-4 animate-spin" />
@@ -137,12 +131,11 @@ export default function LoginPage() {
                   'Sign in'
                 )}
               </Button>
-
             </form>
           </CardContent>
         </Card>
 
-        <p className="text-center text-muted-foreground text-xs mt-6">
+        <p className="text-muted-foreground mt-6 text-center text-xs">
           © {new Date().getFullYear()} Loan Management System
         </p>
       </div>
