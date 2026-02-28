@@ -5,12 +5,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
   DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { MapPinIcon, SearchIcon, BellIcon, SettingsIcon, MoonIcon } from 'lucide-react';
-import { sidebarData } from '@/lib/data/sidebarData';
 
 export function AppHeader() {
   return (
@@ -24,16 +21,6 @@ export function AppHeader() {
             <span className="font-medium">Main St. Branch</span>
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="start">
-          {sidebarData.teams.map(team => (
-            <DropdownMenuItem key={team.name}>
-              <div className="flex flex-col">
-                <span>{team.name}</span>
-                <span className="text-muted-foreground text-xs">{team.plan}</span>
-              </div>
-            </DropdownMenuItem>
-          ))}
-        </DropdownMenuContent>
       </DropdownMenu>
 
       <div className="relative max-w-md flex-1">
