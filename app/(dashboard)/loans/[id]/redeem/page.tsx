@@ -2,23 +2,31 @@
 
 import { useParams, useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { usePawnLoanDetail, useRedeemLoan } from '@/hooks/useLoan';
 
 export default function RedemptionPage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
+  const queryClient = useQueryClient();
 
   const loanId = params.id;
 
-  const { data } = usePawnLoanDetail(loanId);
+  const { data, isLoading } = usePawnLoanDetail(loanId);
   const redeemMutation = useRedeemLoan();
 
   const [verified, setVerified] = useState(false);
 
-  if (!data) return null;
+  if (isLoading) {
+    return <div className="p-6 text-sm text-gray-500">Loading loan details...</div>;
+  }
 
-  const principal = data.loanAmount;
-  const interest = data.totalPayableAmount - data.loanAmount;
+  if (!data) {
+    return <div className="p-6 text-sm text-red-500">Loan not found</div>;
+  }
+
+  const principal = Number(data.loanAmount);
+  const interest = Number(data.totalPayableAmount) - principal;
   const lateFee = 0;
   const previousPayments = 0;
 
@@ -30,9 +38,17 @@ export default function RedemptionPage() {
       return;
     }
 
-    await redeemMutation.mutateAsync(loanId);
+    try {
+      await redeemMutation.mutateAsync(loanId);
 
-    router.push(`/loans/${loanId}`);
+      queryClient.invalidateQueries({ queryKey: ['pawnLoanDetail', loanId] });
+      queryClient.invalidateQueries({ queryKey: ['pawn-loans'] });
+
+      router.push(`/loans/${loanId}`);
+    } catch (error) {
+      console.error(error);
+      alert('Failed to redeem loan');
+    }
   };
 
   return (
@@ -51,19 +67,19 @@ export default function RedemptionPage() {
             <h2 className="mb-4 font-semibold">Loan Settlement Summary</h2>
 
             <div className="space-y-2 text-sm">
-              <Row label="Principal Amount" value={`$${principal}`} />
+              <Row label="Principal Amount" value={`$${principal.toFixed(2)}`} />
 
-              <Row label="Total Interest" value={`+$${interest}`} />
+              <Row label="Total Interest" value={`+$${interest.toFixed(2)}`} />
 
-              <Row label="Late Fees" value={`+$${lateFee}`} red />
+              <Row label="Late Fees" value={`+$${lateFee.toFixed(2)}`} red />
 
-              <Row label="Previous Payments" value={`-$${previousPayments}`} green />
+              <Row label="Previous Payments" value={`-$${previousPayments.toFixed(2)}`} green />
 
               <hr />
 
               <div className="flex justify-between text-lg font-semibold">
                 <span>Total to Pay</span>
-                <span className="text-blue-600">${total}</span>
+                <span className="text-blue-600">${total.toFixed(2)}</span>
               </div>
             </div>
           </div>
@@ -73,16 +89,16 @@ export default function RedemptionPage() {
             <h2 className="mb-4 font-semibold">Physical Item Verification</h2>
 
             <div className="flex gap-4">
-              {data.pawnItem.photoUrl ? (
-                <img src={data.pawnItem.photoUrl} className="h-32 w-32 rounded-lg object-cover" />
+              {data.pawnItem?.photoUrl ? (
+                <img src={data.pawnItem.photoUrl} className="h-32 w-32 rounded-lg object-cover" alt="Pawn item" />
               ) : (
                 <div className="h-32 w-32 rounded-lg bg-gray-200" />
               )}
 
               <div>
-                <p className="font-medium">{data.pawnItem.description}</p>
+                <p className="font-medium">{data.pawnItem?.description}</p>
 
-                <p className="text-sm text-gray-500">{data.pawnItem.itemType}</p>
+                <p className="text-sm text-gray-500">{data.pawnItem?.itemType}</p>
 
                 <label className="mt-4 flex gap-2 text-sm">
                   <input type="checkbox" checked={verified} onChange={e => setVerified(e.target.checked)} />
@@ -99,7 +115,7 @@ export default function RedemptionPage() {
           <div className="rounded-xl bg-white p-6 shadow">
             <h3 className="mb-2 font-semibold">Customer Authorization</h3>
 
-            <p className="text-sm">{data.customer.fullName}</p>
+            <p className="text-sm">{data.customer?.fullName}</p>
 
             <div className="mt-4 flex h-32 items-center justify-center rounded-md border text-sm text-gray-400">
               Signature Area
