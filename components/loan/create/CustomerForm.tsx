@@ -1,5 +1,13 @@
+'use client';
+
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { ChevronRight } from 'lucide-react';
-import { CustomerForm, BUTTON_STYLES } from './types';
+import { CustomerForm, CustomerStepSchema, CustomerStepData } from './types';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 
 interface CustomerStepProps {
   form: CustomerForm;
@@ -9,45 +17,62 @@ interface CustomerStepProps {
 }
 
 export default function CustomerStep({ form, onChange, onNext, onCancel }: CustomerStepProps) {
-  const fields: { key: keyof CustomerForm; label: string; placeholder: string }[] = [
-    { key: 'fullName', label: 'Full Name', placeholder: 'e.g. John Smith' },
-    { key: 'phone', label: 'Phone Number', placeholder: 'e.g. +1 555 000 1234' },
-    { key: 'idNumber', label: 'ID Number', placeholder: 'National ID or Passport' },
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<CustomerStepData>({
+    resolver: zodResolver(CustomerStepSchema),
+    defaultValues: form,
+  });
+
+  const onSubmit = (data: CustomerStepData) => {
+    onChange({ ...form, ...data });
+    onNext();
+  };
+
+  const fields: { key: keyof CustomerStepData; label: string; placeholder: string; required?: boolean }[] = [
+    { key: 'fullName', label: 'Full Name', placeholder: 'e.g. John Smith', required: true },
+    { key: 'phone', label: 'Phone Number', placeholder: 'e.g. +1 555 000 1234', required: true },
+    { key: 'idNumber', label: 'ID Number', placeholder: 'National ID or Passport', required: true },
     { key: 'address', label: 'Address', placeholder: 'Street, City, Country' },
   ];
 
   return (
-    <div className="space-y-6">
-      <div className="overflow-hidden rounded-lg border border-gray-200 bg-white">
-        <div className="border-b border-gray-100 px-6 py-4">
-          <h2 className="text-base font-semibold text-gray-900">Customer Information</h2>
-          <p className="mt-0.5 text-sm text-gray-500">Enter the borrower personal details</p>
-        </div>
-        <div className="grid grid-cols-2 gap-5 p-6">
-          {fields.map(({ key, label, placeholder }) => (
-            <div key={key} className="space-y-1.5">
-              <label className="block text-sm font-medium text-gray-700">{label}</label>
-              <input
-                type="text"
-                placeholder={placeholder}
-                value={form[key] as string}
-                onChange={e => onChange({ ...form, [key]: e.target.value })}
-                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder-gray-400 focus:border-transparent focus:ring-2 focus:ring-blue-500 focus:outline-none"
-              />
-            </div>
-          ))}
-        </div>
-      </div>
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Customer Information</CardTitle>
+          <CardDescription>Enter the borrower personal details</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 gap-5">
+            {fields.map(({ key, label, placeholder, required }) => (
+              <div key={key} className="space-y-1.5">
+                <Label>
+                  {label}
+                  {required && <span className="text-destructive ml-1">*</span>}
+                </Label>
+                <Input
+                  placeholder={placeholder}
+                  {...register(key)}
+                  className={errors[key] ? 'border-destructive focus-visible:ring-destructive/30' : ''}
+                />
+                {errors[key] && <p className="text-destructive text-xs">{errors[key]?.message}</p>}
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
 
-      <div className="mt-6 flex justify-end gap-3">
-        <button className={BUTTON_STYLES.secondary} onClick={onCancel}>
+      <div className="flex justify-end gap-3">
+        <Button type="button" variant="outline" onClick={onCancel}>
           Cancel
-        </button>
-        <button className={BUTTON_STYLES.primary} onClick={onNext}>
-          Next
-          <ChevronRight className="h-4 w-4" />
-        </button>
+        </Button>
+        <Button type="submit">
+          Next <ChevronRight className="ml-1 h-4 w-4" />
+        </Button>
       </div>
-    </div>
+    </form>
   );
 }

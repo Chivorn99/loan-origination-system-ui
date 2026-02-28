@@ -1,8 +1,17 @@
+'use client';
+
+import { useForm, Controller } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import RepaymentSummary from './RepaymentSummary';
+import { LoanForm, ItemForm, LoanStepSchema, LoanStepData } from './types';
 import { Branch } from '@/validations/branch';
 import { Currency } from '@/validations/currency';
-import { LoanForm, ItemForm, BUTTON_STYLES } from './types';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import RepaymentSummary from './RepaymentSummary';
 
 interface LoanDetailsStepProps {
   form: LoanForm;
@@ -31,176 +40,198 @@ export default function LoanDetailsStep({
   interest,
   total,
 }: LoanDetailsStepProps) {
+  const {
+    register,
+    handleSubmit,
+    control,
+    setValue,
+    watch,
+    formState: { errors },
+  } = useForm<LoanStepData>({
+    resolver: zodResolver(LoanStepSchema),
+    defaultValues: {
+      ...form,
+      currencyId: form.currencyId || undefined,
+      branchId: form.branchId || undefined,
+      storageFee: form.storageFee ?? 0,
+      penaltyRate: form.penaltyRate ?? 0,
+      loanDurationDays: form.loanDurationDays ?? 30,
+      gracePeriodDays: form.gracePeriodDays ?? 7,
+    },
+  });
+
+  const loanAmount = watch('loanAmount');
+  const interestRate = watch('interestRate');
+  const computedInterest = (Number(loanAmount || 0) * Number(interestRate || 0)) / 100;
+  const computedTotal = Number(loanAmount || 0) + computedInterest;
+
+  const onSubmit = (data: LoanStepData) => {
+    onChange({ ...form, ...data });
+    onNext();
+  };
+
   const handleQuickDate = (days: number) => {
     const date = new Date();
     date.setDate(date.getDate() + days);
-    onChange({
-      ...form,
-      dueDate: date.toISOString().split('T')[0],
-      loanDurationDays: days,
-    });
+    const formatted = date.toISOString().split('T')[0];
+    setValue('dueDate', formatted, { shouldValidate: true });
+    onChange({ ...form, dueDate: formatted, loanDurationDays: days });
   };
 
   return (
-    <div className="space-y-6">
-      <div className="overflow-hidden rounded-lg border border-gray-200 bg-white">
-        <div className="border-b border-gray-100 px-6 py-4">
-          <h2 className="text-base font-semibold text-gray-900">Financial Terms</h2>
-          <p className="mt-0.5 text-sm text-gray-500">Specify the amount, interest rates, and duration for this loan</p>
-        </div>
-        <div className="p-6">
-          <div className="grid grid-cols-2 gap-6">
-            {/* Left column */}
-            <div className="space-y-5">
-              <div className="space-y-1.5">
-                <label className="block text-sm font-medium text-gray-700">Currency</label>
-                <select
-                  value={form.currencyId}
-                  onChange={e => onChange({ ...form, currencyId: Number(e.target.value) })}
-                  className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-transparent focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                >
-                  <option value="">Select currency</option>
-                  {currenciesLoading && <option disabled>Loading...</option>}
-                  {currencies?.map(currency => (
-                    <option key={currency.id} value={currency.id}>
-                      {currency.code} — {currency.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="block text-sm font-medium text-gray-700">Loan Amount</label>
-                <div className="relative">
-                  <span className="absolute top-1/2 left-3 -translate-y-1/2 text-sm text-gray-400">$</span>
-                  <input
-                    type="number"
-                    placeholder="0.00"
-                    value={form.loanAmount}
-                    onChange={e => onChange({ ...form, loanAmount: e.target.value })}
-                    className="w-full rounded-md border border-gray-300 py-2 pr-3 pl-7 text-sm text-gray-900 placeholder-gray-400 focus:border-transparent focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                  />
-                </div>
-                {itemForm.estimatedValue > 0 && (
-                  <p className="text-xs text-gray-400">
-                    Suggested max for this item: $
-                    {(itemForm.estimatedValue * 0.8).toLocaleString('en-US', { minimumFractionDigits: 2 })}
-                  </p>
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Financial Terms</CardTitle>
+          <CardDescription>Specify the amount, interest rates, and duration for this loan</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 gap-5">
+            <div className="space-y-1.5">
+              <Label>
+                Currency <span className="text-destructive">*</span>
+              </Label>
+              <Controller
+                name="currencyId"
+                control={control}
+                render={({ field }) => (
+                  <Select
+                    value={field.value && field.value !== 0 ? String(field.value) : undefined}
+                    onValueChange={val => field.onChange(Number(val))}
+                  >
+                    <SelectTrigger className={errors.currencyId ? 'border-destructive' : ''}>
+                      <SelectValue placeholder={currenciesLoading ? 'Loading...' : 'Select currency'} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {currencies?.map(c => (
+                        <SelectItem key={c.id} value={String(c.id)}>
+                          {c.code} — {c.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 )}
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="block text-sm font-medium text-gray-700">Interest Rate (Monthly %)</label>
-                <div className="relative">
-                  <input
-                    type="number"
-                    placeholder="0.00"
-                    value={form.interestRate}
-                    onChange={e => onChange({ ...form, interestRate: e.target.value })}
-                    className="w-full rounded-md border border-gray-300 py-2 pr-8 pl-3 text-sm text-gray-900 placeholder-gray-400 focus:border-transparent focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                  />
-                  <span className="absolute top-1/2 right-3 -translate-y-1/2 text-sm text-gray-400">%</span>
-                </div>
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="block text-sm font-medium text-gray-700">Storage Fee ($)</label>
-                <div className="relative">
-                  <span className="absolute top-1/2 left-3 -translate-y-1/2 text-sm text-gray-400">$</span>
-                  <input
-                    type="number"
-                    placeholder="0.00"
-                    min={0}
-                    value={form.storageFee}
-                    onChange={e => onChange({ ...form, storageFee: Number(e.target.value) })}
-                    className="w-full rounded-md border border-gray-300 py-2 pr-3 pl-7 text-sm text-gray-900 placeholder-gray-400 focus:border-transparent focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                  />
-                </div>
-              </div>
+              />
+              {errors.currencyId && <p className="text-destructive text-xs">{errors.currencyId.message}</p>}
             </div>
 
-            {/* Right column */}
-            <div className="space-y-5">
-              <div className="space-y-1.5">
-                <label className="block text-sm font-medium text-gray-700">Branch</label>
-                <select
-                  value={form.branchId}
-                  onChange={e => onChange({ ...form, branchId: Number(e.target.value) })}
-                  className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-transparent focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                >
-                  <option value="">Select branch</option>
-                  {branchesLoading && <option disabled>Loading...</option>}
-                  {branches?.map(branch => (
-                    <option key={branch.id} value={branch.id}>
-                      {branch.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
+            <div className="space-y-1.5">
+              <Label>
+                Branch <span className="text-destructive">*</span>
+              </Label>
+              <Controller
+                name="branchId"
+                control={control}
+                render={({ field }) => (
+                  <Select
+                    value={field.value && field.value !== 0 ? String(field.value) : undefined}
+                    onValueChange={val => field.onChange(Number(val))}
+                  >
+                    <SelectTrigger className={errors.branchId ? 'border-destructive' : ''}>
+                      <SelectValue placeholder={branchesLoading ? 'Loading...' : 'Select branch'} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {branches?.map(b => (
+                        <SelectItem key={b.id} value={String(b.id)}>
+                          {b.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+              {errors.branchId && <p className="text-destructive text-xs">{errors.branchId.message}</p>}
+            </div>
 
-              <div className="space-y-1.5">
-                <label className="block text-sm font-medium text-gray-700">Loan Date</label>
-                <input
-                  type="date"
-                  defaultValue={new Date().toISOString().split('T')[0]}
-                  disabled
-                  className="w-full cursor-not-allowed rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-500"
-                />
-              </div>
+            <div className="space-y-1.5">
+              <Label>
+                Loan Amount <span className="text-destructive">*</span>
+              </Label>
+              <Input
+                type="number"
+                placeholder="0.00"
+                {...register('loanAmount')}
+                className={errors.loanAmount ? 'border-destructive focus-visible:ring-destructive/30' : ''}
+              />
+              {itemForm.estimatedValue > 0 && (
+                <p className="text-muted-foreground text-xs">
+                  Suggested max: $
+                  {(itemForm.estimatedValue * 0.7).toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                </p>
+              )}
+              {errors.loanAmount && <p className="text-destructive text-xs">{errors.loanAmount.message}</p>}
+            </div>
 
-              <div className="space-y-1.5">
-                <label className="block text-sm font-medium text-gray-700">Due Date</label>
-                <input
-                  type="date"
-                  value={form.dueDate}
-                  onChange={e => onChange({ ...form, dueDate: e.target.value })}
-                  className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:border-transparent focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                />
-                <div className="mt-2 flex gap-2">
-                  {[30, 60, 90].map(days => (
-                    <button
-                      key={days}
-                      type="button"
-                      onClick={() => handleQuickDate(days)}
-                      className="rounded border border-blue-200 bg-blue-50 px-3 py-1 text-xs font-medium text-blue-600 transition-colors hover:bg-blue-100"
-                    >
-                      +{days} Days
-                    </button>
-                  ))}
-                </div>
-              </div>
+            <div className="space-y-1.5">
+              <Label>
+                Interest Rate (Monthly %) <span className="text-destructive">*</span>
+              </Label>
+              <Input
+                type="number"
+                placeholder="0.00"
+                {...register('interestRate')}
+                className={errors.interestRate ? 'border-destructive focus-visible:ring-destructive/30' : ''}
+              />
+              {errors.interestRate && <p className="text-destructive text-xs">{errors.interestRate.message}</p>}
+            </div>
 
-              <div className="space-y-1.5">
-                <label className="block text-sm font-medium text-gray-700">Penalty Rate (%)</label>
-                <div className="relative">
-                  <input
-                    type="number"
-                    placeholder="0.00"
-                    min={0}
-                    value={form.penaltyRate}
-                    onChange={e => onChange({ ...form, penaltyRate: Number(e.target.value) })}
-                    className="w-full rounded-md border border-gray-300 py-2 pr-8 pl-3 text-sm text-gray-900 placeholder-gray-400 focus:border-transparent focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                  />
-                  <span className="absolute top-1/2 right-3 -translate-y-1/2 text-sm text-gray-400">%</span>
-                </div>
+            <div className="space-y-1.5">
+              <Label>Loan Date</Label>
+              <Input
+                type="date"
+                defaultValue={new Date().toISOString().split('T')[0]}
+                disabled
+                className="cursor-not-allowed opacity-60"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <Label>
+                Due Date <span className="text-destructive">*</span>
+              </Label>
+              <Input
+                type="date"
+                {...register('dueDate')}
+                className={errors.dueDate ? 'border-destructive focus-visible:ring-destructive/30' : ''}
+              />
+              <div className="flex gap-2">
+                {[30, 60, 90].map(days => (
+                  <button
+                    key={days}
+                    type="button"
+                    onClick={() => handleQuickDate(days)}
+                    className="border-primary/30 bg-primary/10 text-primary hover:bg-primary/20 rounded border px-3 py-1 text-xs font-medium transition-colors"
+                  >
+                    +{days} Days
+                  </button>
+                ))}
               </div>
+              {errors.dueDate && <p className="text-destructive text-xs">{errors.dueDate.message}</p>}
+            </div>
+
+            <div className="space-y-1.5">
+              <Label>Storage Fee</Label>
+              <Input type="number" placeholder="0.00" min={0} {...register('storageFee', { valueAsNumber: true })} />
+            </div>
+
+            <div className="space-y-1.5">
+              <Label>Penalty Rate (%)</Label>
+              <Input type="number" placeholder="0.00" min={0} {...register('penaltyRate', { valueAsNumber: true })} />
             </div>
           </div>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
 
-      <RepaymentSummary loanAmount={form.loanAmount} interest={interest} total={total} />
+      <RepaymentSummary loanAmount={loanAmount} interest={computedInterest} total={computedTotal} />
 
-      <div className="mt-6 flex justify-between gap-3">
-        <button className={BUTTON_STYLES.ghost} onClick={onBack}>
-          <ChevronLeft className="h-4 w-4" />
-          Back
-        </button>
-        <button className={BUTTON_STYLES.primary} onClick={onNext}>
-          Next
-          <ChevronRight className="h-4 w-4" />
-        </button>
+      <div className="flex justify-between gap-3">
+        <Button type="button" variant="ghost" onClick={onBack}>
+          <ChevronLeft className="mr-1 h-4 w-4" /> Back
+        </Button>
+        <Button type="submit">
+          Next <ChevronRight className="ml-1 h-4 w-4" />
+        </Button>
       </div>
-    </div>
+    </form>
   );
 }
