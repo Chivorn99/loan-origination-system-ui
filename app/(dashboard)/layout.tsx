@@ -12,7 +12,6 @@
 //   );
 // }
 
-
 'use client';
 
 import { usePathname } from 'next/navigation';
@@ -27,19 +26,15 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   return (
     <div className="min-h-screen bg-gray-50">
       {isMasterMode ? (
-        <div className="flex flex-col h-screen">
+        <div className="flex h-screen flex-col">
           <MasterHeader />
-          <main className="flex-1 overflow-y-auto p-6">
-            {children}
-          </main>
+          <main className="flex-1 overflow-y-auto p-6">{children}</main>
         </div>
       ) : (
         <AppSidebar>
-          <div className="flex flex-col flex-1">
+          <div className="flex flex-1 flex-col">
             <AppHeader />
-            <main className="p-6">
-              {children}
-            </main>
+            <main className="p-6">{children}</main>
           </div>
         </AppSidebar>
       )}
