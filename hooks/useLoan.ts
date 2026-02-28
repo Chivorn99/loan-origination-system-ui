@@ -10,34 +10,19 @@ import {
   getLoansByStatusService,
 } from '@/services/loanService';
 
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
-export const usePawnLoans = (page = 0, size = 10, status?: string, search?: string) => {
+export const usePawnLoans = (page = 0, size = 10, status?: string) => {
   return useQuery({
-    queryKey: ['pawn-loans', page, size, status, search],
-
-    queryFn: async () => {
-      if (search && search.trim() !== '') {
-        const loan = await getLoanByCodeService(search);
-
-        return {
-          success: true,
-          message: '',
-          data: {
-            content: [loan],
-            totalElements: 1,
-            totalPages: 1,
-            size: 1,
-            number: 0,
-          },
-        };
-      }
-
-      if (status) {
+    queryKey: ['pawn-loans', page, size, status ?? ''],
+    queryFn: () => {
+      if (status && status !== '') {
         return getLoansByStatusService(status, page, size);
       }
+
       return getAllLoansService(page, size);
     },
+    placeholderData: previousData => previousData,
   });
 };
 
@@ -57,21 +42,39 @@ export function useLoanByCode(code: string) {
   });
 }
 
-export const useCreateFullLoan = () => {
+export const useCreateFullLoan = (onSuccess?: () => void) => {
+  const queryClient = useQueryClient();
+
   return useMutation({
     mutationFn: createFullLoanService,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['pawn-loans'] });
+      onSuccess?.();
+    },
   });
 };
 
 export const useRedeemLoan = () => {
+  const queryClient = useQueryClient();
+
   return useMutation({
     mutationFn: redeemLoanService,
+    onSuccess: (_, id) => {
+      queryClient.invalidateQueries({ queryKey: ['pawn-loans'] });
+      queryClient.invalidateQueries({ queryKey: ['pawnLoanDetail', id] });
+    },
   });
 };
 
 export const useDefaultLoan = () => {
+  const queryClient = useQueryClient();
+
   return useMutation({
     mutationFn: defaultLoanService,
+    onSuccess: (_, id) => {
+      queryClient.invalidateQueries({ queryKey: ['pawn-loans'] });
+      queryClient.invalidateQueries({ queryKey: ['pawnLoanDetail', id] });
+    },
   });
 };
 

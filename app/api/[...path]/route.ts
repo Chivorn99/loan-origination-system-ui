@@ -9,21 +9,48 @@ async function handler(req: Request, method: string, path: string[]) {
 
   const url = `${base}/${endpoint}${query}`;
 
+  console.log('Proxy Request URL:', url);
+  console.log('Proxy Method:', method);
+
   try {
+    const body = method !== 'GET' && method !== 'DELETE' ? await req.text() : undefined;
+
+    if (body) {
+      console.log('Proxy Request Body:', body);
+    }
+
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+    };
+
+    const auth = req.headers.get('authorization');
+    if (auth) {
+      headers.Authorization = auth;
+    }
+
+    const cookie = req.headers.get('cookie');
+    if (cookie) {
+      headers.Cookie = cookie;
+    }
+
     const res = await fetch(url, {
       method,
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: method !== 'GET' && method !== 'DELETE' ? await req.text() : undefined,
+      headers,
+      body,
     });
 
+    const contentType = res.headers.get('content-type') ?? 'application/json';
     const data = await res.arrayBuffer();
+
+    const text = new TextDecoder().decode(data);
+
+    console.log('Proxy Response Status:', res.status);
+    console.log('Proxy Response Data:', text);
 
     return new Response(data, {
       status: res.status,
       headers: {
-        'Content-Type': res.headers.get('content-type') ?? 'application/json',
+        'Content-Type': contentType,
       },
     });
   } catch (error) {

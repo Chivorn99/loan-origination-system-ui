@@ -1,17 +1,15 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { Pencil, Trash2, Loader2, PlusIcon } from 'lucide-react';
+import { Pencil, Trash2, PlusIcon, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
-import { type Currency } from '@/validations/currency';
-import { useCurrencies } from '@/hooks/useCurrency';
-import { currencyService } from '@/services/currencyService';
-import { CurrencyFormModal } from './Currencyformmodal';
-import { CurrencyStatusToggle } from './Currencystatustoggle';
+import { type Branch } from '@/validations/branch';
+import { useBranches } from '@/hooks/useBranch';
+import { branchService } from '@/services/branchService';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -22,60 +20,45 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import { BranchFormModal } from './BranchFormModal';
 
 type Props = {
   triggerCreate?: boolean;
   onCreateHandled?: () => void;
 };
 
-export function CurrencyList({ triggerCreate, onCreateHandled }: Props) {
+export function BranchList({ triggerCreate, onCreateHandled }: Props) {
   const [page, setPage] = useState(0);
-  const [togglingId, setTogglingId] = useState<number | null>(null);
-  const [deleteTarget, setDeleteTarget] = useState<Currency | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<Branch | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
-  const [editingCurrency, setEditingCurrency] = useState<Currency | null>(null);
+  const [editingBranch, setEditingBranch] = useState<Branch | null>(null);
 
   const size = 10;
   const queryClient = useQueryClient();
-  const { data, isLoading, error } = useCurrencies(page, size);
+  const { data, isLoading, error } = useBranches(page, size);
 
-  const currencies: Currency[] = useMemo(() => data?.content ?? [], [data?.content]);
+  const branches: Branch[] = useMemo(() => data?.content ?? [], [data?.content]);
   const totalElements = data?.totalElements ?? 0;
   const totalPages = data?.totalPages ?? 0;
   const currentPage = data?.number ?? 0;
 
-  const start = currencies.length ? currentPage * size + 1 : 0;
-  const end = Math.min(start + currencies.length - 1, totalElements);
+  const start = branches.length ? currentPage * size + 1 : 0;
+  const end = Math.min(start + branches.length - 1, totalElements);
 
   useEffect(() => {
     if (triggerCreate) {
-      setEditingCurrency(null);
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setEditingBranch(null);
       setModalOpen(true);
       onCreateHandled?.();
     }
   }, [triggerCreate, onCreateHandled]);
 
-  const invalidate = () => queryClient.invalidateQueries({ queryKey: ['currencies'] });
-
-  const handleEdit = (currency: Currency) => {
-    setEditingCurrency(currency);
-    setModalOpen(true);
-  };
-
-  const handleToggleStatus = async (currency: Currency) => {
-    const newStatus = currency.status === 'ACTIVE' ? 'INACTIVE' : 'ACTIVE';
-    setTogglingId(currency.id);
-    try {
-      await currencyService.patch(currency.id, { status: newStatus });
-      invalidate();
-    } finally {
-      setTogglingId(null);
-    }
-  };
+  const invalidate = () => queryClient.invalidateQueries({ queryKey: ['branches'] });
 
   const handleDelete = async () => {
     if (!deleteTarget) return;
-    await currencyService.delete(deleteTarget.id);
+    await branchService.delete(deleteTarget.id);
     invalidate();
     setDeleteTarget(null);
   };
@@ -85,18 +68,18 @@ export function CurrencyList({ triggerCreate, onCreateHandled }: Props) {
       <Card className="shadow-sm">
         <CardHeader className="flex flex-row items-center justify-between">
           <div>
-            <CardTitle className="text-base">Currencies</CardTitle>
-            <CardDescription className="text-sm">Manage supported currencies</CardDescription>
+            <CardTitle className="text-base">Branches</CardTitle>
+            <CardDescription className="text-sm">Manage pawnshop branch locations</CardDescription>
           </div>
           <Button
             size="sm"
             onClick={() => {
-              setEditingCurrency(null);
+              setEditingBranch(null);
               setModalOpen(true);
             }}
           >
             <PlusIcon className="mr-2 h-4 w-4" />
-            Add Currency
+            Add Branch
           </Button>
         </CardHeader>
 
@@ -105,10 +88,9 @@ export function CurrencyList({ triggerCreate, onCreateHandled }: Props) {
             <Table>
               <TableHeader>
                 <TableRow className="bg-muted/50 hover:bg-muted/50">
-                  <TableHead className="text-xs font-semibold tracking-wider uppercase">Code</TableHead>
                   <TableHead className="text-xs font-semibold tracking-wider uppercase">Name</TableHead>
-                  <TableHead className="text-xs font-semibold tracking-wider uppercase">Symbol</TableHead>
-                  <TableHead className="text-xs font-semibold tracking-wider uppercase">Decimal Places</TableHead>
+                  <TableHead className="text-xs font-semibold tracking-wider uppercase">Address</TableHead>
+                  <TableHead className="text-xs font-semibold tracking-wider uppercase">Phone</TableHead>
                   <TableHead className="text-xs font-semibold tracking-wider uppercase">Status</TableHead>
                   <TableHead className="w-24 text-right text-xs font-semibold tracking-wider uppercase">
                     Actions
@@ -120,7 +102,7 @@ export function CurrencyList({ triggerCreate, onCreateHandled }: Props) {
                 {isLoading &&
                   Array.from({ length: 4 }).map((_, i) => (
                     <TableRow key={i}>
-                      {Array.from({ length: 6 }).map((_, j) => (
+                      {Array.from({ length: 5 }).map((_, j) => (
                         <TableCell key={j}>
                           <div className="bg-muted h-4 w-full animate-pulse rounded" />
                         </TableCell>
@@ -130,50 +112,47 @@ export function CurrencyList({ triggerCreate, onCreateHandled }: Props) {
 
                 {!isLoading && error && (
                   <TableRow>
-                    <TableCell colSpan={6} className="text-destructive py-10 text-center text-sm">
-                      Failed to load currencies
+                    <TableCell colSpan={5} className="text-destructive py-10 text-center text-sm">
+                      Failed to load branches
                     </TableCell>
                   </TableRow>
                 )}
 
-                {!isLoading && !error && currencies.length === 0 && (
+                {!isLoading && !error && branches.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={6} className="text-muted-foreground py-10 text-center text-sm">
-                      No currencies found
+                    <TableCell colSpan={5} className="text-muted-foreground py-10 text-center text-sm">
+                      No branches found
                     </TableCell>
                   </TableRow>
                 )}
 
                 {!isLoading &&
-                  currencies.map(currency => (
-                    <TableRow key={currency.id} className="hover:bg-muted/40 transition-colors">
+                  branches.map(branch => (
+                    <TableRow key={branch.id} className="hover:bg-muted/40 transition-colors">
+                      <TableCell className="text-primary font-semibold">{branch.name}</TableCell>
+                      <TableCell className="text-sm">{branch.address ?? '—'}</TableCell>
+                      <TableCell className="text-sm">{branch.phone ?? '—'}</TableCell>
                       <TableCell>
-                        <span className="text-primary font-semibold tracking-wide">{currency.code}</span>
-                      </TableCell>
-                      <TableCell className="text-sm">{currency.name}</TableCell>
-                      <TableCell>
-                        <span className="bg-muted inline-flex h-8 w-8 items-center justify-center rounded-lg border text-sm font-semibold">
-                          {currency.symbol}
-                        </span>
-                      </TableCell>
-                      <TableCell className="text-sm">{currency.decimalPlace}</TableCell>
-                      <TableCell>
-                        <CurrencyStatusToggle
-                          status={currency.status}
-                          onChange={() => handleToggleStatus(currency)}
-                          loading={togglingId === currency.id}
-                        />
+                        <Badge variant={branch.status === 'ACTIVE' ? 'default' : 'secondary'}>{branch.status}</Badge>
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex items-center justify-end gap-1">
-                          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleEdit(currency)}>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8"
+                            onClick={() => {
+                              setEditingBranch(branch);
+                              setModalOpen(true);
+                            }}
+                          >
                             <Pencil className="h-3.5 w-3.5" />
                           </Button>
                           <Button
                             variant="ghost"
                             size="icon"
                             className="text-destructive hover:text-destructive h-8 w-8"
-                            onClick={() => setDeleteTarget(currency)}
+                            onClick={() => setDeleteTarget(branch)}
                           >
                             <Trash2 className="h-3.5 w-3.5" />
                           </Button>
@@ -190,7 +169,7 @@ export function CurrencyList({ triggerCreate, onCreateHandled }: Props) {
                 <span className="text-foreground font-medium">
                   {start}–{end}
                 </span>{' '}
-                of <span className="text-foreground font-medium">{totalElements}</span> currencies
+                of <span className="text-foreground font-medium">{totalElements}</span> branches
               </p>
               <div className="flex items-center gap-1">
                 <Button
@@ -229,11 +208,11 @@ export function CurrencyList({ triggerCreate, onCreateHandled }: Props) {
       </Card>
 
       {modalOpen && (
-        <CurrencyFormModal
-          currency={editingCurrency}
+        <BranchFormModal
+          branch={editingBranch}
           onClose={() => {
             setModalOpen(false);
-            setEditingCurrency(null);
+            setEditingBranch(null);
           }}
           onSuccess={invalidate}
         />
@@ -242,9 +221,9 @@ export function CurrencyList({ triggerCreate, onCreateHandled }: Props) {
       <AlertDialog open={!!deleteTarget} onOpenChange={open => !open && setDeleteTarget(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Currency</AlertDialogTitle>
+            <AlertDialogTitle>Delete Branch</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete <strong>{deleteTarget?.code}</strong>? This action cannot be undone.
+              Are you sure you want to delete <strong>{deleteTarget?.name}</strong>? This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
