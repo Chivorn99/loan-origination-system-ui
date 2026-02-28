@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import { format } from 'date-fns';
 
 import { usePawnLoans } from '@/hooks/useLoan';
-import { PawnLoan } from '@/validations/loan';
 
 import { StatusBadge } from './StatusBadge';
 import { CustomFilters } from './CustomFilter';
@@ -23,7 +22,7 @@ export function LoanList() {
 
   const { data, isLoading, error } = usePawnLoans(page, size, statusFilter);
 
-  const loans: PawnLoan[] = data?.data?.content ?? [];
+  const loans = data?.data?.content ?? [];
   const totalElements = data?.data?.totalElements ?? 0;
   const totalPages = data?.data?.totalPages ?? 0;
   const currentPage = data?.data?.number ?? 0;
