@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
@@ -31,9 +32,23 @@ import { Item, ItemContent, ItemDescription, ItemMedia, ItemTitle } from '../ui/
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { UserAvatar } from '../userAvatar';
+import { useLogout } from '@/hooks/useAuth';
 
 export function AppSidebar({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const logout = useLogout();
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    try {
+      await logout.mutateAsync();
+      document.cookie = 'token=; path=/; max-age=0';
+      router.replace('/login');
+      router.refresh();
+    } catch (error) {
+      console.error('Logout failed', error);
+    }
+  };
 
   return (
     <SidebarProvider>
@@ -123,7 +138,7 @@ export function AppSidebar({ children }: { children: React.ReactNode }) {
                   </DropdownMenuGroup>
                   <DropdownMenuSeparator />
                   <DropdownMenuGroup>
-                    <DropdownMenuItem>Log out</DropdownMenuItem>
+                    <DropdownMenuItem onClick={handleLogout}>Log out</DropdownMenuItem>
                   </DropdownMenuGroup>
                 </DropdownMenuContent>
               </DropdownMenu>

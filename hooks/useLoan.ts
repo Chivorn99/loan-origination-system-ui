@@ -1,5 +1,6 @@
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
-  getAllLoansService,
+  pawnLoanService,
   getLoanDetailService,
   getLoanByCodeService,
   createFullLoanService,
@@ -7,85 +8,83 @@ import {
   defaultLoanService,
   loanPaymentScheduleService,
   loanOverdueService,
-  getLoansByStatusService,
 } from '@/services/loanService';
+import type { PawnLoanDetail, PawnLoanPageResponse, CreateFullLoanPayload } from '@/validations/loan';
 
-import { useQuery, useMutation } from '@tanstack/react-query';
-
-export const usePawnLoans = (page = 0, size = 10, status?: string, search?: string) => {
-  return useQuery({
-    queryKey: ['pawn-loans', page, size, status, search],
-
-    queryFn: async () => {
-      if (search && search.trim() !== '') {
-        const loan = await getLoanByCodeService(search);
-
-        return {
-          success: true,
-          message: '',
-          data: {
-            content: [loan],
-            totalElements: 1,
-            totalPages: 1,
-            size: 1,
-            number: 0,
-          },
-        };
-      }
-
-      if (status) {
-        return getLoansByStatusService(status, page, size);
-      }
-      return getAllLoansService(page, size);
+export function usePawnLoans(page = 0, size = 10, status?: string, customerId?: number) {
+  return useQuery<PawnLoanPageResponse>({
+    queryKey: ['pawn-loans', page, size, status, customerId],
+    queryFn: () => {
+      if (customerId) return pawnLoanService.getByCustomer(customerId, page, size);
+      if (status) return pawnLoanService.getByStatus(status, page, size);
+      return pawnLoanService.getAll(page, size);
     },
   });
-};
+}
 
 export function usePawnLoanDetail(id: string) {
-  return useQuery({
-    queryKey: ['pawnLoanDetail', id],
+  return useQuery<PawnLoanDetail>({
+    queryKey: ['pawn-loans', id],
     queryFn: () => getLoanDetailService(id),
     enabled: !!id,
   });
 }
 
 export function useLoanByCode(code: string) {
-  return useQuery({
-    queryKey: ['loanCode', code],
+  return useQuery<PawnLoanDetail>({
+    queryKey: ['pawn-loans', 'code', code],
     queryFn: () => getLoanByCodeService(code),
     enabled: !!code,
   });
 }
 
-export const useCreateFullLoan = () => {
-  return useMutation({
+export const useCreateFullLoan = (onSuccess?: () => void) => {
+  const queryClient = useQueryClient();
+
+  return useMutation<PawnLoanDetail, Error, CreateFullLoanPayload>({
     mutationFn: createFullLoanService,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['pawn-loans'] });
+      onSuccess?.();
+    },
   });
 };
 
 export const useRedeemLoan = () => {
-  return useMutation({
+  const queryClient = useQueryClient();
+
+  return useMutation<PawnLoanDetail, Error, string>({
     mutationFn: redeemLoanService,
+    onSuccess: (_, id) => {
+      queryClient.invalidateQueries({ queryKey: ['pawn-loans'] });
+      queryClient.invalidateQueries({ queryKey: ['pawn-loans', id] });
+    },
   });
 };
 
 export const useDefaultLoan = () => {
-  return useMutation({
+  const queryClient = useQueryClient();
+
+  return useMutation<PawnLoanDetail, Error, string>({
     mutationFn: defaultLoanService,
+    onSuccess: (_, id) => {
+      queryClient.invalidateQueries({ queryKey: ['pawn-loans'] });
+      queryClient.invalidateQueries({ queryKey: ['pawn-loans', id] });
+    },
   });
 };
 
 export function useLoanPaymentSchedule(id: string) {
   return useQuery({
-    queryKey: ['loanSchedule', id],
+    queryKey: ['pawn-loans', id, 'schedule'],
     queryFn: () => loanPaymentScheduleService(id),
     enabled: !!id,
   });
 }
 
 export function useLoanOverdue(id: string) {
-  return useQuery({
-    queryKey: ['loanOverdue', id],
+  return useQuery<boolean>({
+    queryKey: ['pawn-loans', id, 'overdue'],
     queryFn: () => loanOverdueService(id),
     enabled: !!id,
   });

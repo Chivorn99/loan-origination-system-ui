@@ -2,33 +2,42 @@
 
 import { useParams, useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
+
 import { usePawnLoanDetail } from '@/hooks/useLoan';
 import { useCreateRepayment } from '@/hooks/useRepayment';
+import { usePaymentMethods } from '@/hooks/usePaymentMethod';
+import { useCurrencies } from '@/hooks/useCurrency';
 
 export default function RecordPaymentPage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
+  const queryClient = useQueryClient();
 
   const loanId = params.id;
-  const { data: loan } = usePawnLoanDetail(loanId);
 
+  const { data: loan } = usePawnLoanDetail(loanId);
   const createRepayment = useCreateRepayment();
 
+  const { data: paymentMethods } = usePaymentMethods({
+    page: 0,
+    size: 100,
+    status: 'ACTIVE',
+  });
+
+  const { data: currencies } = useCurrencies(0, 100, 'ACTIVE');
+
   const [amount, setAmount] = useState<number>(0);
-  const [paymentMethod, setPaymentMethod] = useState<number>(1);
+  const [paymentMethodId, setPaymentMethodId] = useState<number>(1);
+  const [currencyId, setCurrencyId] = useState<number>(1);
 
   if (!loan) return null;
 
   const principal = Number(loan.loanAmount);
   const interestDue = Number(loan.totalPayableAmount) - principal;
-
-  const penaltyDue = 0; // adjust if your backend calculates separately
+  const penaltyDue = 0;
 
   const totalDue = principal + interestDue + penaltyDue;
-
-  /* -------------------------------- */
-  /* PREVIEW CALCULATION */
-  /* -------------------------------- */
 
   const penaltyPaidPreview = Math.min(amount, penaltyDue);
   const afterPenalty = amount - penaltyPaidPreview;
@@ -60,14 +69,14 @@ export default function RecordPaymentPage() {
     const remainingPrincipal = principal - principalPaid;
 
     if (remainingPrincipal <= 0) {
-      alert('Full repayment must use redeem endpoint (remaining principal cannot be 0)');
+      alert('Full repayment must use redeem endpoint');
       return;
     }
 
     await createRepayment.mutateAsync({
       pawnLoanId: loan.id,
-      currencyId: loan.currency.id,
-      paymentMethodId: paymentMethod,
+      currencyId: currencyId,
+      paymentMethodId: paymentMethodId,
       paymentTypeId: 1,
 
       paidAmount: Number(amount.toFixed(2)),
@@ -79,6 +88,9 @@ export default function RecordPaymentPage() {
       receivedBy: 1,
       paymentDate: new Date().toISOString().split('T')[0],
     });
+
+    queryClient.invalidateQueries({ queryKey: ['pawnLoanDetail', loan.id] });
+    queryClient.invalidateQueries({ queryKey: ['pawn-loans'] });
 
     router.push(`/loans/${loan.id}`);
   };
@@ -93,13 +105,13 @@ export default function RecordPaymentPage() {
           <p className="text-sm opacity-80">TOTAL AMOUNT DUE</p>
 
           <p className="text-3xl font-bold">
-            {loan.currency.symbol}
+            {loan.currency?.symbol}
             {totalDue.toFixed(2)}
           </p>
 
-          <p className="text-sm opacity-80">
+          {/* <p className="text-sm opacity-80">
             Loan #{loan.loanCode} · {loan.customer.fullName}
-          </p>
+          </p> */}
         </div>
 
         <div className="flex gap-4">
@@ -112,20 +124,41 @@ export default function RecordPaymentPage() {
       <div className="space-y-6 rounded-xl bg-white p-6 shadow">
         <Input label="Payment Amount" value={amount} onChange={setAmount} />
 
+        {/* Currency */}
+        <div>
+          <label className="text-sm font-medium">Currency</label>
+
+          <select
+            value={currencyId}
+            onChange={e => setCurrencyId(Number(e.target.value))}
+            className="mt-1 w-full rounded-md border px-3 py-2"
+          >
+            {currencies?.content?.map(currency => (
+              <option key={currency.id} value={currency.id}>
+                {currency.code} ({currency.symbol})
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* Payment Method */}
         <div>
           <label className="text-sm font-medium">Payment Method</label>
 
           <select
-            value={paymentMethod}
-            onChange={e => setPaymentMethod(Number(e.target.value))}
+            value={paymentMethodId}
+            onChange={e => setPaymentMethodId(Number(e.target.value))}
             className="mt-1 w-full rounded-md border px-3 py-2"
           >
-            <option value={1}>Cash</option>
-            <option value={2}>Bank Transfer</option>
-            <option value={3}>Card</option>
+            {paymentMethods?.content?.map(method => (
+              <option key={method.id} value={method.id}>
+                {method.name}
+              </option>
+            ))}
           </select>
         </div>
 
+        {/* Preview */}
         <div className="space-y-2 border-t pt-4 text-sm">
           <Row label="Principal Paid" value={principalPaidPreview} />
           <Row label="Interest Paid" value={interestPaidPreview} />
@@ -136,6 +169,7 @@ export default function RecordPaymentPage() {
           <Row label="Remaining Principal" value={remainingPrincipalPreview} blue />
         </div>
 
+        {/* Buttons */}
         <div className="flex justify-end gap-4">
           <button onClick={() => router.back()} className="text-gray-600">
             Cancel
