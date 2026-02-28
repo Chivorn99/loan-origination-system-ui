@@ -4,6 +4,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { usePawnLoanDetail, useRedeemLoan } from '@/hooks/useLoan';
+import Image from 'next/image';
 
 export default function RedemptionPage() {
   const params = useParams<{ id: string }>();
@@ -90,7 +91,7 @@ export default function RedemptionPage() {
 
             <div className="flex gap-4">
               {data.pawnItem?.photoUrl ? (
-                <img src={data.pawnItem.photoUrl} className="h-32 w-32 rounded-lg object-cover" alt="Pawn item" />
+                <Image src={data.pawnItem.photoUrl} className="h-32 w-32 rounded-lg object-cover" alt="Pawn item" />
               ) : (
                 <div className="h-32 w-32 rounded-lg bg-gray-200" />
               )}

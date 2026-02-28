@@ -1,7 +1,8 @@
 'use client';
 
 import { useParams, useRouter } from 'next/navigation';
-import { usePawnLoanDetail, useRedeemLoan, useDefaultLoan } from '@/hooks/useLoan';
+import { usePawnLoanDetail } from '@/hooks/useLoan';
+import Image from 'next/image';
 
 const formatCurrency = (amount: number | null | undefined, symbol: string | null | undefined) => {
   if (amount == null) return '—';
@@ -19,8 +20,6 @@ export default function LoanDetailPage() {
   const loanId = params.id;
 
   const { data, isLoading, isError } = usePawnLoanDetail(loanId);
-  const redeemMutation = useRedeemLoan();
-  const defaultMutation = useDefaultLoan();
 
   if (isLoading) {
     return (
@@ -59,7 +58,6 @@ export default function LoanDetailPage() {
 
   return (
     <div className="min-h-screen bg-gray-100 p-6">
-      {/* Header */}
       <div className="mb-6 flex items-center justify-between">
         <div className="flex items-center gap-4">
           <button
@@ -122,13 +120,12 @@ export default function LoanDetailPage() {
             </div>
           </div>
 
-          {/* Collateral */}
           <div className="rounded-xl bg-white p-6 shadow">
             <h2 className="mb-4 text-lg font-semibold">Collateral Item</h2>
             {data.pawnItem ? (
               <div className="flex gap-6">
                 {data.pawnItem.photoUrl ? (
-                  <img src={data.pawnItem.photoUrl} alt="Collateral" className="h-28 w-28 rounded-lg object-cover" />
+                  <Image src={data.pawnItem.photoUrl} alt="Collateral" className="h-28 w-28 rounded-lg object-cover" />
                 ) : (
                   <div className="flex h-28 w-28 items-center justify-center rounded-lg bg-gray-200 text-sm text-gray-500">
                     No Image
@@ -144,17 +141,8 @@ export default function LoanDetailPage() {
               <p className="text-sm text-gray-500">No collateral information available.</p>
             )}
           </div>
-
-          {/* Payment History */}
-          <div className="rounded-xl bg-white p-6 shadow">
-            <h2 className="mb-4 text-lg font-semibold">Payment History</h2>
-            <p className="text-sm text-gray-500">No payment history available yet.</p>
-          </div>
         </div>
-
-        {/* RIGHT */}
         <div className="space-y-6">
-          {/* Financial Breakdown */}
           <div className="rounded-xl bg-white p-6 shadow">
             <h2 className="mb-4 text-lg font-semibold">Financial Breakdown</h2>
             <div className="space-y-3 text-sm">
@@ -168,7 +156,6 @@ export default function LoanDetailPage() {
             </div>
           </div>
 
-          {/* Loan Details */}
           <div className="rounded-xl bg-white p-6 shadow">
             <h2 className="mb-4 text-lg font-semibold">Loan Details</h2>
             <div className="space-y-2 text-sm">
@@ -185,17 +172,6 @@ export default function LoanDetailPage() {
               )}
             </div>
           </div>
-
-          {/* Actions */}
-          {data.status === 'ACTIVE' && (
-            <button
-              disabled={defaultMutation.isPending}
-              onClick={() => defaultMutation.mutate(loanId)}
-              className="w-full rounded-lg bg-red-600 py-3 text-white hover:bg-red-700 disabled:opacity-50"
-            >
-              {defaultMutation.isPending ? 'Processing...' : 'Mark as Defaulted'}
-            </button>
-          )}
         </div>
       </div>
     </div>

@@ -35,20 +35,14 @@ export const sidebarData = {
       isActive: false,
     },
     {
-      title: 'Items',
-      url: '/items',
-      icon: PackageIcon,
-      isActive: false,
-    },
-    {
       title: 'Masters',
       url: '/masters',
       icon: SettingsIcon,
       isActive: false,
     },
     {
-      title: 'Reports',
-      url: '/reports',
+      title: 'Register',
+      url: '/register',
       icon: BarChart3Icon,
       isActive: false,
     },
