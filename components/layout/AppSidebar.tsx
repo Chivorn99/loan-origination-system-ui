@@ -132,12 +132,6 @@ export function AppSidebar({ children }: { children: React.ReactNode }) {
                   </DropdownMenuGroup>
                   <DropdownMenuSeparator />
                   <DropdownMenuGroup>
-                    <DropdownMenuItem>Account</DropdownMenuItem>
-                    <DropdownMenuItem>Billing</DropdownMenuItem>
-                    <DropdownMenuItem>Settings</DropdownMenuItem>
-                  </DropdownMenuGroup>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuGroup>
                     <DropdownMenuItem onClick={handleLogout}>Log out</DropdownMenuItem>
                   </DropdownMenuGroup>
                 </DropdownMenuContent>
