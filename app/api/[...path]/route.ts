@@ -36,11 +36,18 @@ async function handler(req: Request, method: string, path: string[]) {
         try {
           const parts = token.split('.');
           if (parts.length === 3) {
-            const payload = JSON.parse(Buffer.from(parts[1].replace(/-/g, '+').replace(/_/g, '/'), 'base64').toString('utf8')) as Record<string, unknown>;
+            const payload = JSON.parse(
+              Buffer.from(parts[1].replace(/-/g, '+').replace(/_/g, '/'), 'base64').toString('utf8')
+            ) as Record<string, unknown>;
             const now = Math.floor(Date.now() / 1000);
             const exp = typeof payload.exp === 'number' ? payload.exp : null;
             const iat = typeof payload.iat === 'number' ? payload.iat : null;
-            console.log('[API Proxy] Token claims:', { sub: payload.sub ?? null, exp, iat, expIn: exp ? exp - now : null });
+            console.log('[API Proxy] Token claims:', {
+              sub: payload.sub ?? null,
+              exp,
+              iat,
+              expIn: exp ? exp - now : null,
+            });
           }
         } catch {
           // ignore decoding errors
@@ -90,7 +97,10 @@ async function handler(req: Request, method: string, path: string[]) {
     return new Response(data, { status: res.status, headers: responseHeaders });
   } catch (err) {
     console.error('[API Proxy] Error:', err);
-    return new Response(JSON.stringify({ error: 'Proxy error' }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+    return new Response(JSON.stringify({ error: 'Proxy error' }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' },
+    });
   }
 }
 

@@ -74,14 +74,12 @@ export function AppSidebar({ children }: { children: React.ReactNode }) {
           <SidebarMenu>
             <SidebarMenuItem>
               <SidebarMenuButton size="lg" asChild>
-                <Link href="/dashboard" className="flex items-center gap-2 px-2 py-1 hover:bg-sidebar-accent rounded-lg transition">
-                  <Image
-                    src={sidebarData.branding.logo}
-                    alt={sidebarData.branding.name}
-                    width={24}
-                    height={24}
-                  />
-                  <span className="font-semibold text-sm">{sidebarData.branding.name}</span>
+                <Link
+                  href="/dashboard"
+                  className="hover:bg-sidebar-accent flex items-center gap-2 rounded-lg px-2 py-1 transition"
+                >
+                  <Image src={sidebarData.branding.logo} alt={sidebarData.branding.name} width={24} height={24} />
+                  <span className="text-sm font-semibold">{sidebarData.branding.name}</span>
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
@@ -103,7 +101,7 @@ export function AppSidebar({ children }: { children: React.ReactNode }) {
                       className="hover:bg-sidebar-accent rounded-lg transition"
                     >
                       <Link href={item.url} className="flex items-center gap-2 px-2 py-2">
-                        <item.icon className="size-4 text-muted-foreground" />
+                        <item.icon className="text-muted-foreground size-4" />
                         <span className="text-sm">{item.title}</span>
                       </Link>
                     </SidebarMenuButton>
@@ -122,16 +120,16 @@ export function AppSidebar({ children }: { children: React.ReactNode }) {
                 <DropdownMenuTrigger asChild>
                   <SidebarMenuButton
                     size="lg"
-                    className="flex items-center gap-2 px-2 py-2 hover:bg-sidebar-accent rounded-lg transition data-open:bg-sidebar-accent data-open:text-sidebar-accent-foreground"
+                    className="hover:bg-sidebar-accent data-open:bg-sidebar-accent data-open:text-sidebar-accent-foreground flex items-center gap-2 rounded-lg px-2 py-2 transition"
                   >
                     <Avatar className="h-8 w-8 rounded-lg">
                       <AvatarFallback>{initials}</AvatarFallback>
                     </Avatar>
                     <div className="flex flex-col text-left text-sm leading-tight">
-                      <span className="font-medium truncate">{user?.username ?? 'User'}</span>
-                      <span className="text-muted-foreground text-xs truncate">{user?.email ?? ''}</span>
+                      <span className="truncate font-medium">{user?.username ?? 'User'}</span>
+                      <span className="text-muted-foreground truncate text-xs">{user?.email ?? ''}</span>
                     </div>
-                    <ChevronsUpDownIcon className="size-4 ml-auto" />
+                    <ChevronsUpDownIcon className="ml-auto size-4" />
                   </SidebarMenuButton>
                 </DropdownMenuTrigger>
 
@@ -155,7 +153,10 @@ export function AppSidebar({ children }: { children: React.ReactNode }) {
                   <DropdownMenuSeparator />
 
                   <DropdownMenuGroup>
-                    <DropdownMenuItem onClick={handleLogout} className="cursor-pointer hover:bg-red-50 text-destructive">
+                    <DropdownMenuItem
+                      onClick={handleLogout}
+                      className="text-destructive cursor-pointer hover:bg-red-50"
+                    >
                       Log out
                     </DropdownMenuItem>
                   </DropdownMenuGroup>

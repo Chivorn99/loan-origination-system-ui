@@ -20,11 +20,14 @@ export async function POST(req: Request) {
 
     if (!process.env.API_URL) {
       console.error('[Auth proxy] Missing API_URL environment variable');
-      return new Response(JSON.stringify({ error: 'Server misconfiguration' }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+      return new Response(JSON.stringify({ error: 'Server misconfiguration' }), {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' },
+      });
     }
 
-      // Normalize API_URL to avoid duplicate '/api' segments (e.g. API_URL may already include '/api')
-      const rawApiUrl = process.env.API_URL.replace(/\/+$|\s+/g, '');
+    // Normalize API_URL to avoid duplicate '/api' segments (e.g. API_URL may already include '/api')
+    const rawApiUrl = process.env.API_URL.replace(/\/+$|\s+/g, '');
     const baseApi = rawApiUrl.replace(/\/api$|\/api\/$/, '').replace(/\/$/, '');
     // Upstream auth endpoint is expected at /api/auth/login — normalize to avoid double '/api'
     const upstreamUrl = `${baseApi}/api/auth/login`;
@@ -36,7 +39,7 @@ export async function POST(req: Request) {
       body: JSON.stringify(body ?? {}),
     });
 
-  // Parse upstream response defensively — it may be empty or non-JSON
+    // Parse upstream response defensively — it may be empty or non-JSON
     let data: Record<string, unknown> | null = null;
     const contentType = res.headers.get('content-type') ?? '';
     if (contentType.includes('application/json')) {
@@ -74,7 +77,10 @@ export async function POST(req: Request) {
       console.warn('[Auth proxy] Upstream login failed', { status: res.status, headers: upstreamHeaders, body: data });
       // If upstream returned success:false but HTTP 200, convert to 401 so client treats it as an auth failure
       const statusToReturn = !res.ok ? res.status : 401;
-      return new Response(JSON.stringify({ error: message }), { status: statusToReturn, headers: { 'Content-Type': 'application/json' } });
+      return new Response(JSON.stringify({ error: message }), {
+        status: statusToReturn,
+        headers: { 'Content-Type': 'application/json' },
+      });
     }
 
     let token: string | null = null;
@@ -98,6 +104,9 @@ export async function POST(req: Request) {
   } catch (err: unknown) {
     // Log unexpected server-side errors and return JSON response rather than raw stack
     console.error('Error in /api/auth/login proxy:', err);
-    return new Response(JSON.stringify({ error: 'Internal server error' }), { status: 500, headers: { 'Content-Type': 'application/json' } });
+    return new Response(JSON.stringify({ error: 'Internal server error' }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' },
+    });
   }
 }

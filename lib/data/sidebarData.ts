@@ -1,10 +1,4 @@
-import {
-  LayoutDashboardIcon,
-  FileTextIcon,
-  UsersIcon,
-  SettingsIcon,
-  BarChart3Icon,
-} from 'lucide-react';
+import { LayoutDashboardIcon, FileTextIcon, UsersIcon, SettingsIcon, BarChart3Icon } from 'lucide-react';
 
 export const sidebarData = {
   branding: {

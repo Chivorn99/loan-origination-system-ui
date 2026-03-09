@@ -103,7 +103,6 @@ export default function RegisterPage() {
             <Button type="submit" className="w-full" disabled={registerMutation.isPending}>
               {registerMutation.isPending ? 'Creating...' : 'Register'}
             </Button>
-
           </form>
         </CardContent>
       </Card>
