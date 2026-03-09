@@ -156,8 +156,8 @@ export default function CombinedHomePage() {
             <span className="text-blue-600 underline decoration-blue-200 underline-offset-8">digital convenience.</span>
           </h1>
           <p className="mt-8 max-w-2xl text-lg leading-relaxed font-medium text-slate-500 md:text-xl">
-            A comprehensive Loan Origination System designed to modernize the industry. We provide Main Character
-            Energy to both shop owners and customers through transparency and security.
+            A comprehensive Loan Origination System designed to modernize the industry. We provide Main Character Energy
+            to both shop owners and customers through transparency and security.
           </p>
         </section>
 
