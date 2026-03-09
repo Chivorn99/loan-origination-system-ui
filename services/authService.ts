@@ -1,3 +1,4 @@
+import { authHeaders } from '@/lib/api';
 import {
   AuthResponse,
   AuthResponseSchema,
@@ -6,7 +7,6 @@ import {
   RegisterPayload,
   RegisterSchema,
 } from '@/validations/auth';
-import { authHeaders } from '@/lib/api';
 
 const API = '/api/auth';
 
@@ -22,35 +22,22 @@ export const loginService = async (payload: LoginPayload): Promise<AuthResponse>
   if (!res.ok) throw new Error('Invalid username or password');
 
   const json = await res.json();
+
   return AuthResponseSchema.parse(json);
+};
+
+export const logoutService = async () => {
+  await fetch(`${API}/logout`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+  });
+  // The server-side /logout endpoint is responsible for clearing the HttpOnly cookie.
+  // Avoid attempting to clear HttpOnly cookies from client-side code.
 };
 
 export const registerService = async (payload: RegisterPayload) => {
   const parsed = RegisterSchema.parse(payload);
-
-  const res = await fetch(`${API}/register`, {
-    method: 'POST',
-    headers: authHeaders(),
-    body: JSON.stringify(parsed),
-  });
-
-  if (!res.ok) {
-    const message = await res.text();
-    throw new Error(message || 'Register failed');
-  }
-
+  const res = await fetch(`${API}/register`, { method: 'POST', headers: authHeaders(), body: JSON.stringify(parsed) });
+  if (!res.ok) throw new Error('Register failed');
   return res.json();
-};
-
-export const logoutService = async () => {
-  const res = await fetch(`${API}/logout`, {
-    method: 'POST',
-    headers: authHeaders(),
-  });
-
-  if (!res.ok) throw new Error('Logout failed');
-
-  document.cookie = 'token=; path=/; max-age=0';
-
-  return res.text();
 };

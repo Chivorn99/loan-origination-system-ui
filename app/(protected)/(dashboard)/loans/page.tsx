@@ -49,7 +49,7 @@ export default function LoansPage() {
   ];
 
   return (
-    <div className="bg-muted min-h-screen">
+    <div className="min-h-screen">
       <div className="mx-auto max-w-7xl space-y-6 p-6">
         <div className="flex items-center justify-between">
           <div>

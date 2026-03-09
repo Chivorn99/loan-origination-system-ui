@@ -40,7 +40,7 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="bg-muted min-h-screen">
+    <div className="min-h-screen">
       <Card className="mx-y m-6 max-w-7xl space-y-6">
         <CardHeader>
           <CardTitle>Create Account</CardTitle>
@@ -104,9 +104,6 @@ export default function RegisterPage() {
               {registerMutation.isPending ? 'Creating...' : 'Register'}
             </Button>
 
-            <Button type="button" variant="outline" className="w-full" onClick={() => router.push('/login')}>
-              Back to Login
-            </Button>
           </form>
         </CardContent>
       </Card>

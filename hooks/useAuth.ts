@@ -1,14 +1,6 @@
-import { loginService, registerService, logoutService } from '@/services/authService';
 import { useMutation } from '@tanstack/react-query';
+import { loginService, logoutService, registerService } from '@/services/authService';
 
-export const useLogin = () => {
-  return useMutation({ mutationFn: loginService });
-};
-
-export const useRegister = () => {
-  return useMutation({ mutationFn: registerService });
-};
-
-export const useLogout = () => {
-  return useMutation({ mutationFn: logoutService });
-};
+export const useLogin = () => useMutation({ mutationFn: loginService });
+export const useLogout = () => useMutation({ mutationFn: logoutService });
+export const useRegister = () => useMutation({ mutationFn: registerService });

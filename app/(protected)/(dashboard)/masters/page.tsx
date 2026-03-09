@@ -39,8 +39,8 @@ export default function MastersPage() {
   };
 
   return (
-    <div className="bg-muted min-h-screen">
-      <div className="mx-auto max-w-6xl space-y-6 p-6">
+    <div className="min-h-screen">
+      <div className="mx-auto max-w-7xl space-y-6 p-6">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-foreground text-2xl font-semibold">Master Data</h1>

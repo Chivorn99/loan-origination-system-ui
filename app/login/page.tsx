@@ -1,7 +1,8 @@
 'use client';
-
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useQueryClient } from '@tanstack/react-query';
+import { getCurrentUserService } from '@/services/userService';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -23,6 +24,7 @@ type LoginForm = z.infer<typeof LoginSchema>;
 export default function LoginPage() {
   const router = useRouter();
   const login = useLogin();
+  const queryClient = useQueryClient();
   const [showPassword, setShowPassword] = useState(false);
 
   const {
@@ -35,8 +37,18 @@ export default function LoginPage() {
 
   const onSubmit = (data: LoginForm) => {
     login.mutate(data, {
-      onSuccess: res => {
-        document.cookie = `token=${res.token}; path=/; max-age=${60 * 60 * 24 * 7}`;
+      onSuccess: async () => {
+        // Token is managed via an HttpOnly cookie set by the server/proxy.
+        // Do not persist token in localStorage for security.
+        // Invalidate or refetch current-user so UI can load user details immediately
+        try {
+          // Fetch current user immediately and wait so sidebar has user data on dashboard.
+          // This request uses cookie-based auth (server will send the HttpOnly cookie automatically).
+          await queryClient.fetchQuery({ queryKey: ['current-user'], queryFn: getCurrentUserService });
+        } catch {
+          // If fetching current user fails, still continue to dashboard; sidebar will handle missing data
+        }
+
         router.push('/dashboard');
         router.refresh();
       },
@@ -51,7 +63,7 @@ export default function LoginPage() {
             <Landmark className="text-primary-foreground h-7 w-7" />
           </div>
           <div className="text-center">
-            <h1 className="text-foreground text-2xl font-bold tracking-tight">Loan Management System</h1>
+            <h1 className="text-foreground text-2xl font-bold tracking-tight">Pawn Shop</h1>
             <p className="text-muted-foreground mt-1 text-sm">Sign in to access your dashboard</p>
           </div>
         </div>
@@ -135,9 +147,7 @@ export default function LoginPage() {
           </CardContent>
         </Card>
 
-        <p className="text-muted-foreground mt-6 text-center text-xs">
-          © {new Date().getFullYear()} Loan Management System
-        </p>
+        <p className="text-muted-foreground mt-6 text-center text-xs">© {new Date().getFullYear()} Pawn Shop</p>
       </div>
     </div>
   );

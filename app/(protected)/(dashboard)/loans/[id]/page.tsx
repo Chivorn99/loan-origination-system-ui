@@ -57,8 +57,8 @@ export default function LoanDetailPage() {
   const interest = data.totalPayableAmount != null ? data.totalPayableAmount - data.loanAmount : null;
 
   return (
-    <div className="min-h-screen bg-gray-100 p-6">
-      <div className="mb-6 flex items-center justify-between">
+    <div className="min-h-screen">
+      <div className="mx-auto max-w-7xl space-y-6 p-6">
         <div className="flex items-center gap-4">
           <button
             onClick={() => router.back()}

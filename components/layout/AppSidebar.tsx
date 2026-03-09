@@ -1,5 +1,4 @@
 'use client';
-
 import * as React from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Image from 'next/image';
@@ -31,44 +30,41 @@ import {
 
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { ChevronsUpDownIcon } from 'lucide-react';
-
 import { sidebarData } from '@/lib/data/sidebarData';
 import { Item, ItemContent, ItemDescription, ItemMedia, ItemTitle } from '../ui/item';
-
 import { useLogout } from '@/hooks/useAuth';
+import { useQueryClient } from '@tanstack/react-query';
 import { useCurrentUser } from '@/hooks/useUser';
 
 export function AppSidebar({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const logout = useLogout();
   const router = useRouter();
-
   const { data: user } = useCurrentUser();
+  const queryClient = useQueryClient();
 
-  const role = user?.role?.name?.toLowerCase();
+  const role = user?.role?.code?.toUpperCase();
+  const initials = user?.username?.[0].toUpperCase() ?? 'U';
 
   const filteredNav = sidebarData.navMain.filter(item => {
-    if (role === 'admin') return true;
-
+    if (role === 'SUPERADMIN') return true;
     return item.title !== 'Masters' && item.title !== 'Register';
   });
 
   const handleLogout = async () => {
     try {
       await logout.mutateAsync();
-      document.cookie = 'token=; path=/; max-age=0';
-      router.replace('/login');
+      // Remove cached current-user so UI no longer shows the signed-out user
+      try {
+        queryClient.removeQueries({ queryKey: ['current-user'] });
+      } catch {}
+      // After successful logout, send the user to the public homepage
+      router.replace('/');
       router.refresh();
     } catch (error) {
       console.error('Logout failed', error);
     }
   };
-
-  const initials =
-    user?.role?.name
-      ?.split(' ')
-      .map((n: string) => n[0])
-      .join('') ?? '';
 
   return (
     <SidebarProvider>
@@ -78,14 +74,14 @@ export function AppSidebar({ children }: { children: React.ReactNode }) {
           <SidebarMenu>
             <SidebarMenuItem>
               <SidebarMenuButton size="lg" asChild>
-                <Link href="/dashboard">
-                  <div className="m-1 flex h-6 w-6 shrink-0 items-center justify-center">
-                    <Image src={sidebarData.branding.logo} alt={sidebarData.branding.name} width={24} height={24} />
-                  </div>
-
-                  <div className="grid flex-1 text-left text-sm leading-tight">
-                    <span className="truncate font-semibold">{sidebarData.branding.name}</span>
-                  </div>
+                <Link href="/dashboard" className="flex items-center gap-2 px-2 py-1 hover:bg-sidebar-accent rounded-lg transition">
+                  <Image
+                    src={sidebarData.branding.logo}
+                    alt={sidebarData.branding.name}
+                    width={24}
+                    height={24}
+                  />
+                  <span className="font-semibold text-sm">{sidebarData.branding.name}</span>
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
@@ -98,13 +94,17 @@ export function AppSidebar({ children }: { children: React.ReactNode }) {
             <SidebarMenu>
               {filteredNav.map(item => {
                 const isActive = pathname === item.url;
-
                 return (
                   <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton tooltip={item.title} asChild isActive={isActive}>
-                      <Link href={item.url}>
-                        <item.icon className="size-4" />
-                        <span>{item.title}</span>
+                    <SidebarMenuButton
+                      tooltip={item.title}
+                      asChild
+                      isActive={isActive}
+                      className="hover:bg-sidebar-accent rounded-lg transition"
+                    >
+                      <Link href={item.url} className="flex items-center gap-2 px-2 py-2">
+                        <item.icon className="size-4 text-muted-foreground" />
+                        <span className="text-sm">{item.title}</span>
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
@@ -122,34 +122,30 @@ export function AppSidebar({ children }: { children: React.ReactNode }) {
                 <DropdownMenuTrigger asChild>
                   <SidebarMenuButton
                     size="lg"
-                    className="data-open:bg-sidebar-accent data-open:text-sidebar-accent-foreground"
+                    className="flex items-center gap-2 px-2 py-2 hover:bg-sidebar-accent rounded-lg transition data-open:bg-sidebar-accent data-open:text-sidebar-accent-foreground"
                   >
                     <Avatar className="h-8 w-8 rounded-lg">
                       <AvatarFallback>{initials}</AvatarFallback>
                     </Avatar>
-
-                    <div className="grid flex-1 text-left text-sm leading-tight">
-                      <span className="truncate font-medium">{user?.role?.name ?? 'User'}</span>
-
-                      <span className="text-muted-foreground truncate text-xs">{user?.email ?? ''}</span>
+                    <div className="flex flex-col text-left text-sm leading-tight">
+                      <span className="font-medium truncate">{user?.username ?? 'User'}</span>
+                      <span className="text-muted-foreground text-xs truncate">{user?.email ?? ''}</span>
                     </div>
-
-                    <ChevronsUpDownIcon className="size-4" />
+                    <ChevronsUpDownIcon className="size-4 ml-auto" />
                   </SidebarMenuButton>
                 </DropdownMenuTrigger>
 
-                <DropdownMenuContent className="w-[--radix-dropdown-menu-trigger-width]" align="start">
+                <DropdownMenuContent align="start" className="w-60">
                   <DropdownMenuGroup>
                     <DropdownMenuLabel>
-                      <Item size={'sm'}>
+                      <Item size="sm">
                         <ItemMedia>
                           <Avatar>
                             <AvatarFallback>{initials}</AvatarFallback>
                           </Avatar>
                         </ItemMedia>
-
                         <ItemContent>
-                          <ItemTitle>{user?.role?.name}</ItemTitle>
+                          <ItemTitle>{user?.username}</ItemTitle>
                           <ItemDescription>{user?.email}</ItemDescription>
                         </ItemContent>
                       </Item>
@@ -159,7 +155,9 @@ export function AppSidebar({ children }: { children: React.ReactNode }) {
                   <DropdownMenuSeparator />
 
                   <DropdownMenuGroup>
-                    <DropdownMenuItem onClick={handleLogout}>Log out</DropdownMenuItem>
+                    <DropdownMenuItem onClick={handleLogout} className="cursor-pointer hover:bg-red-50 text-destructive">
+                      Log out
+                    </DropdownMenuItem>
                   </DropdownMenuGroup>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -170,6 +168,7 @@ export function AppSidebar({ children }: { children: React.ReactNode }) {
         <SidebarRail />
       </Sidebar>
 
+      {/* CONTENT */}
       <SidebarInset>{children}</SidebarInset>
     </SidebarProvider>
   );
